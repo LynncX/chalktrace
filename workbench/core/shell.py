@@ -23,14 +23,15 @@ def wrap(*, title: str, tab_pairs: list, css: str, js: str,
                   for i, (t, _) in enumerate(tab_pairs))
     panels = "".join(c.tab_panel(t.no, body, active=i == 0)
                      for i, (t, body) in enumerate(tab_pairs))
+    # TITLE / EYEBROW / META / FOOT 是纯文本，必须转义；CSS / JS / NAV / PANELS 是既有 HTML
     values = {
-        "TITLE": title,
-        "EYEBROW": eyebrow,
-        "META": meta,
+        "TITLE": c.esc(title),
+        "EYEBROW": c.esc(eyebrow),
+        "META": c.esc(meta),
         "CSS": css,
         "NAV": nav,
         "PANELS": panels,
-        "FOOT": foot,
+        "FOOT": c.esc(foot),
         "PAYLOAD": json.dumps(payload, ensure_ascii=False).replace("<", "\\u003c"),
         "JS": js,
     }

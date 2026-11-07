@@ -7,8 +7,8 @@ metrics:
   - {label: 采样帧, key: stages.01.metrics.sampled}
   - {label: 模糊丢弃, key: stages.01.metrics.blur_dropped}
 figures:
-  - {path: media/01_frames/sample_0000.jpg, caption: 采样帧}
   - {path: media/01_frames/contact_sheet.jpg, caption: 全片接触表}
+  - {glob: "media/01_frames/sample_*.jpg", caption: "采样帧 · {stem}", limit: 18}
 tables:
   - {path: 01_frames/frames.json, columns: [frame, ts, blur, kept], title: 抽帧明细}
 folds:

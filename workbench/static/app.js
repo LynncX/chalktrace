@@ -27,6 +27,20 @@
     }
   };
 
+  /* 实验页：首变体与选中变体的逐图对照滑杆 */
+  Array.prototype.slice.call(document.querySelectorAll('.wb-slider')).forEach(function (box) {
+    var clip = box.querySelector('.wb-slider-clip');
+    var line = box.querySelector('.wb-slider-line');
+    var range = box.querySelector('.wb-slider-range');
+    if (!clip || !line || !range) { return; }
+    function apply(v) {
+      clip.style.clipPath = 'inset(0 0 0 ' + v + '%)';
+      line.style.left = v + '%';
+    }
+    range.addEventListener('input', function () { apply(range.value); });
+    apply(range.value);
+  });
+
   var lb = document.getElementById('wb-lb');
   if (!lb) { return; }
   var lbImg = lb.querySelector('img');

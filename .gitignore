@@ -22,6 +22,10 @@ dist/
 runs/*
 !runs/.gitkeep
 
+# 单阶段实验：过程产物，选中变体后可整目录丢弃
+experiments/*
+!experiments/.gitkeep
+
 # --- 数据与视频：体积大 / 含师生肖像 ---
 data/videos/*
 !data/videos/.gitkeep

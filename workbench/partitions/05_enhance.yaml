@@ -6,7 +6,7 @@ metrics:
   - {label: 快照, key: stages.05.metrics.snapshots}
   - {label: 平均清晰度, key: stages.05.metrics.clarity}
 figures:
-  - {path: media/05_enhance/board_017.png, caption: board_017}
-  - {path: media/05_enhance/board_full.png, caption: 全分辨率原帧}
+  - {glob: "media/05_enhance/*_color.jpg", caption: "原彩色帧 · {stem}", limit: 18}
+  - {glob: "media/05_enhance/*.png", caption: "增强 / 全分辨率 · {stem}", limit: 18}
 folds:
   - {title: 增强链路, body: "灰度化 → CLAHE → 自适应二值化 → 去噪；增强图送 OCR，原彩色帧留作证据。"}

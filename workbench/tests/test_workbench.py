@@ -4,6 +4,8 @@
 """
 from __future__ import annotations
 
+import base64
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -139,6 +141,141 @@ class AnnotationTests(unittest.TestCase):
                          "def render(ctx):\n    return '<p>ok</p>'\n", encoding="utf-8")
             tab = registry.discover(Path(td))[0]
             self.assertIn("wb-impl", tab.render(RunContext(DEMO)))
+
+
+class GlobFigureTests(unittest.TestCase):
+    def setUp(self):
+        self.td = tempfile.TemporaryDirectory()
+        self.root = Path(self.td.name)
+        (self.root / "manifest.json").write_text("{}", encoding="utf-8")
+        media = self.root / "media" / "s"
+        media.mkdir(parents=True)
+        tiny = base64.b64decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==")
+        for name in ("f_2.png", "f_10.png", "f_1.png", "notes.txt"):
+            (media / name).write_bytes(tiny if name.endswith(".png") else b"text")
+        self.ctx = RunContext(self.root, assets_mode="link")
+
+    def tearDown(self):
+        self.td.cleanup()
+
+    @staticmethod
+    def _tab(figures):
+        return make_tab({"no": "01", "name": "x", "short": "x",
+                         "kind": "stage", "figures": figures})
+
+    def test_glob_discovers_in_natural_order_and_skips_non_media(self):
+        html = self._tab([{"glob": "media/s/*.png", "caption": "{stem}"}]).render(self.ctx)
+        self.assertEqual(html.count('class="wb-figure"'), 3)
+        self.assertLess(html.index("f_1.png"), html.index("f_2.png"))
+        self.assertLess(html.index("f_2.png"), html.index("f_10.png"))
+        self.assertNotIn("notes.txt", html)
+
+    def test_glob_limit_and_missing_is_silent(self):
+        html = self._tab([{"glob": "media/s/*.png", "limit": 2},
+                          {"glob": "media/none/*.png"}]).render(self.ctx)
+        self.assertEqual(html.count('class="wb-figure"'), 2)
+        self.assertNotIn("缺失", html)
+
+    def test_explicit_path_missing_still_shows_placeholder(self):
+        self.assertIn("缺失", self._tab([{"path": "media/s/nope.png"}]).render(self.ctx))
+
+    def test_glob_cannot_escape_run_dir(self):
+        self.assertEqual(self._tab([{"glob": "../*.png"}]).render(self.ctx).count('class="wb-figure"'), 0)
+
+
+class ExperimentTests(unittest.TestCase):
+    """实验页：kind 分发、等尺寸对齐、默认 link、run 契约不受影响。"""
+    TINY = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==")
+
+    def setUp(self):
+        self.td = tempfile.TemporaryDirectory()
+        self.root = Path(self.td.name) / "exp_case"
+        self.root.mkdir()
+        mf = {
+            "kind": "experiment", "run_id": "exp_case",
+            "title": "06 OCR · <参数>实验", "stage_name": "OCR 识别",
+            "winner": "v2",
+            "samples": [{"id": "07", "title": "板书密集"}, {"id": "12"}],
+            "variants": [
+                {"id": "v1", "name": "baseline", "params": {"clahe": "off"},
+                 "images": {"07": "media/v1/07.png", "12": "media/v1/12.png"},
+                 "captions": {"07": "0.91"}},
+                {"id": "v2", "name": "+ CLAHE", "params": {"clahe": "on"},
+                 "images": {"07": "media/v2/07.png", "12": "media/v2/missing.png"},
+                 "captions": {"07": "0.96"}},
+            ],
+            "compare": [{"配置": "baseline", "识别框": 12},
+                        {"配置": "+ CLAHE", "识别框": 14}],
+        }
+        (self.root / "manifest.json").write_text(
+            json.dumps(mf, ensure_ascii=False), encoding="utf-8")
+        for rel in ("media/v1/07.png", "media/v1/12.png", "media/v2/07.png"):
+            p = self.root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(self.TINY)
+
+    def tearDown(self):
+        self.td.cleanup()
+
+    def _html(self, **kw) -> str:
+        info = wb_build.build(str(self.root), out=str(Path(self.td.name) / "x.html"), **kw)
+        return info["path"].read_text(encoding="utf-8")
+
+    def test_kind_dispatches_experiment_partitions(self):
+        info = wb_build.build(str(self.root), out=str(Path(self.td.name) / "x.html"))
+        html = info["path"].read_text(encoding="utf-8")
+        self.assertEqual(info["kind"], "experiment")
+        self.assertEqual(info["tabs"], 2)
+        self.assertIn("wb-vgrid", html)
+        self.assertIn("单阶段实验", html)
+        self.assertNotIn("{{WB_", html)
+        self.assertNotIn('class="wb-details wb-impl"', html)  # 实验页不带阶段实现标注
+        self.assertIn("&lt;参数&gt;", html)          # 标题照常转义
+
+    def test_experiment_default_assets_link_and_override(self):
+        link = wb_build.build(str(self.root), out=str(Path(self.td.name) / "link.html"))
+        self.assertEqual(link["mode"], "link")
+        self.assertEqual(link["embedded"], 0)
+        inline = wb_build.build(str(self.root), assets_mode="inline",
+                                out=str(Path(self.td.name) / "inline.html"))
+        self.assertGreater(inline["embedded"], 0)
+
+    def test_variant_grid_aligned_winner_and_placeholder(self):
+        html = self._html()
+        self.assertEqual(html.count('class="wb-vcell'), 4)   # 2 样本 × 2 变体
+        self.assertEqual(html.count('class="wb-vparam"')
+                         + html.count('class="wb-vparam is-winner"'), 2)
+        self.assertIn("is-winner", html)
+        self.assertIn("缺失", html)
+        self.assertIn('data-lb="exp-00-07"', html)            # 同一行可翻页
+
+    def test_slider_only_when_both_images_exist(self):
+        html = self._html()
+        self.assertEqual(html.count('class="wb-slider"'), 1)  # 样本 12 缺一图 → 跳过
+        self.assertIn("baseline ⇄ + CLAHE", html)
+
+    def test_experiment_partitions_are_valid_yaml(self):
+        tabs = registry.discover(ROOT / "workbench" / "partitions_experiment")
+        self.assertEqual([t.no for t in tabs], ["00", "01"])
+
+    def test_run_contract_unchanged(self):
+        info = wb_build.build("demo_mock", out=str(Path(self.td.name) / "run.html"))
+        html = info["path"].read_text(encoding="utf-8")
+        self.assertEqual(info["kind"], "run")
+        self.assertEqual(info["tabs"], 11)
+        self.assertEqual(info["mode"], "tiered")
+        self.assertEqual(html.count('class="wb-details wb-impl"'), 9)
+
+    def test_fixture_schema(self):
+        mf = json.loads((ROOT / "workbench" / "fixtures" / "demo_experiment" / "manifest.json")
+                        .read_text(encoding="utf-8"))
+        sids = {s["id"] for s in mf["samples"]}
+        self.assertEqual(mf["kind"], "experiment")
+        self.assertIn(mf["winner"], {v["id"] for v in mf["variants"]})
+        for v in mf["variants"]:
+            self.assertTrue(set(v["images"]).issubset(sids))
 
 
 if __name__ == "__main__":

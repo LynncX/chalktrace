@@ -8,6 +8,7 @@ metrics:
   - {label: 放行率, key: stages.04.metrics.pass_rate, unit: "%"}
 figures:
   - {path: media/04_gate/ssim_chart.png, caption: SSIM / 清晰度曲线}
+  - {glob: "media/04_gate/fired_*.jpg", caption: "触发帧 · {stem}", limit: 18}
 tables:
   - {path: 04_gate/gate.json, columns: [frame, ts, ssim, clarity, fired], title: 门控记录}
 folds:

@@ -7,7 +7,8 @@ metrics:
   - {label: 识别框, key: stages.06.metrics.boxes}
   - {label: 平均置信度, key: stages.06.metrics.score}
 figures:
-  - {path: media/06_ocr/overlay_017.png, caption: 识别框叠加}
+  - {glob: "media/06_ocr/overlay_*.png", caption: "识别框叠加 · {stem}", limit: 24}
+  - {glob: "media/06_ocr/original_*.jpg", caption: "OCR 原帧 · {stem}", limit: 18}
 tables:
   - {path: 06_ocr/calls.json, columns: [call, frame, ts, text, score], title: 识别结果}
 folds:

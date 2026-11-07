@@ -6,7 +6,8 @@ metrics:
   - {label: 检测帧, key: stages.03.metrics.pose_frames}
   - {label: 高遮挡帧, key: stages.03.metrics.occluded}
 figures:
-  - {path: media/03_pose/pose_overlay.jpg, caption: 骨架叠加}
   - {path: media/03_pose/pose_demo.mp4, caption: 姿态演示视频, poster: media/poster.jpg}
+  - {glob: "media/03_pose/pose_*.jpg", caption: "骨架叠加 · {stem}", limit: 18}
+  - {glob: "media/03_pose/occlusion_*.png", caption: "遮挡率 · {stem}", limit: 6}
 folds:
   - {title: 遮挡判定, body: "人体框与白板 ROI 的交并比超过 0.30 时，该帧不进入门控。"}

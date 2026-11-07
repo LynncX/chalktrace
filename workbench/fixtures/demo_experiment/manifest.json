@@ -1,0 +1,40 @@
+{
+  "kind": "experiment",
+  "run_id": "exp_ocr_clahe_20261107",
+  "title": "06 OCR · CLAHE / PSM 参数实验",
+  "created_at": "2026-11-07 16:40",
+  "stage": "06",
+  "stage_name": "OCR 识别",
+  "input": "固定输入：05_enhance 的 3 张快照（样本 07 / 12 / 21）",
+  "winner": "clahe_on",
+  "samples": [
+    {"id": "07", "title": "板书密集"},
+    {"id": "12", "title": "逆光低对比"},
+    {"id": "21", "title": "短时板书"}
+  ],
+  "variants": [
+    {
+      "id": "baseline", "name": "baseline",
+      "params": {"clahe": "off", "psm": 3},
+      "images": {"07": "media/baseline/s07.png", "12": "media/baseline/s12.png", "21": "media/baseline/s21.png"},
+      "captions": {"07": "0.91 · 12 框", "12": "0.83 · 9 框", "21": "0.88 · 7 框"}
+    },
+    {
+      "id": "clahe_on", "name": "+ CLAHE",
+      "params": {"clahe": "on", "psm": 3},
+      "images": {"07": "media/clahe_on/s07.png", "12": "media/clahe_on/s12.png", "21": "media/clahe_on/s21.png"},
+      "captions": {"07": "0.96 · 14 框", "12": "0.94 · 13 框", "21": "0.92 · 10 框"}
+    },
+    {
+      "id": "psm6", "name": "PSM 6",
+      "params": {"clahe": "off", "psm": 6},
+      "images": {"07": "media/psm6/s07.png", "12": "media/psm6/s12.png", "21": "media/psm6/s21.png"},
+      "captions": {"07": "0.88 · 11 框", "12": "0.85 · 10 框", "21": "—"}
+    }
+  ],
+  "compare": [
+    {"配置": "baseline", "clahe": "off", "psm": 3, "平均置信度": 0.87, "识别框": 28, "人工核对": "抽样"},
+    {"配置": "+ CLAHE", "clahe": "on", "psm": 3, "平均置信度": 0.94, "识别框": 37, "人工核对": "全量"},
+    {"配置": "PSM 6", "clahe": "off", "psm": 6, "平均置信度": 0.86, "识别框": 21, "人工核对": "未做"}
+  ]
+}

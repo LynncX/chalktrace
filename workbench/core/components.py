@@ -128,6 +128,61 @@ def gallery(assets: list[ResolvedAsset], *, cols: int | None = None) -> str:
             + ">" + "".join(asset_figure(a) for a in assets) + "</div>")
 
 
+# --- 实验页：等尺寸对齐网格 ---
+def variant_grid(samples: list[dict], variants: list[dict], cells: dict,
+                 *, winner: str = "", pick_label: str = "选中",
+                 param_label: str = "参数") -> str:
+    """列 = 变体，行 = 同一样本；cells[(sample_id, variant_id)] 是已渲染的 figure HTML。"""
+    if not samples or not variants:
+        return ""
+    ids = [str(v.get("id", v.get("name", ""))) for v in variants]
+    out = [f'<div class="wb-vgrid" style="--wb-vcols:{len(variants)}">',
+           '<div class="wb-vcorner"></div>']
+    for v, vid in zip(variants, ids):
+        on = " is-winner" if winner and vid == winner else ""
+        pick = f'<span class="wb-vpick">{esc(pick_label)}</span>' if on else ""
+        out.append(f'<div class="wb-vcol-head{on}">{esc(v.get("name", vid))}{pick}</div>')
+    out.append(f'<div class="wb-vparam-label">{esc(param_label)}</div>')
+    for v, vid in zip(variants, ids):
+        on = " is-winner" if winner and vid == winner else ""
+        params = v.get("params") or {}
+        text = (" · ".join(f"{k}={val}" for k, val in params.items())
+                if isinstance(params, dict) else str(params))
+        out.append(f'<div class="wb-vparam{on}">{esc(text) or "—"}</div>')
+    for s in samples:
+        sid = str(s.get("id", ""))
+        sub = s.get("title", "")
+        label = f'<small>{esc(sub)}</small>' if sub else ""
+        out.append(f'<div class="wb-vrow-label">{esc(sid)}{label}</div>')
+        for vid in ids:
+            on = " is-winner" if winner and vid == winner else ""
+            out.append(f'<div class="wb-vcell{on}">{cells.get((sid, vid), "")}</div>')
+    out.append("</div>")
+    return "".join(out)
+
+
+def slider_pair(a: ResolvedAsset, b: ResolvedAsset, *, label: str = "",
+                label_a: str = "", label_b: str = "") -> str:
+    """同一输入的两张等尺寸结果图，拖动分割线对照；缺任一图就不渲染。"""
+    if a.missing or b.missing or a.kind != "image" or b.kind != "image":
+        return ""
+
+    def img(r: ResolvedAsset) -> str:
+        fb = (f' data-fallback="{esc(r.fallback)}" onerror="wbFallback(this)"'
+              if r.fallback else "")
+        return (f'<img class="wb-slider-img" src="{esc(r.src)}"'
+                f' alt="{esc(r.alt)}"{fb}>')
+
+    keys = f"{label_a} ⇄ {label_b}" if (label_a or label_b) else ""
+    return (f'<div class="wb-slider-case"><div class="wb-slider-top">'
+            f'<span>{esc(label)}</span><span class="wb-slider-keys">{esc(keys)}</span></div>'
+            f'<div class="wb-slider">{img(a)}'
+            f'<div class="wb-slider-clip">{img(b)}</div>'
+            f'<div class="wb-slider-line"></div>'
+            f'<input class="wb-slider-range" type="range" min="0" max="100" value="50"'
+            f' aria-label="对照分割线"></div></div>')
+
+
 # --- 表格 / 折叠 ---
 def table(rows: list[dict], columns: list[str] | None = None, *, title: str = "") -> str:
     if not rows:

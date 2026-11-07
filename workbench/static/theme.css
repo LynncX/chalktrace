@@ -109,6 +109,31 @@ button { font: inherit; }
 .wb-file-link:hover { background: var(--surface-2); }
 .wb-arrow { color: var(--faint); }
 
+/* 实验页：变体对照网格（列=变体，行=样本，强制等宽等高） */
+.wb-vgrid { display: grid; grid-template-columns: 84px repeat(var(--wb-vcols, 3), minmax(0, 1fr)); gap: 14px; align-items: start; }
+.wb-vcol-head { font-size: 13px; min-width: 0; overflow-wrap: anywhere; padding-bottom: 2px; }
+.wb-vcol-head.is-winner { color: var(--accent); }
+.wb-vpick { font-size: 11px; color: var(--accent); margin-left: 6px; }
+.wb-vparam-label { font-size: 11px; color: var(--faint); padding: 7px 0; }
+.wb-vparam { font-family: var(--mono); font-size: 11px; color: var(--faint); background: var(--surface); border-radius: 6px; padding: 7px 9px; min-width: 0; overflow-wrap: anywhere; }
+.wb-vparam.is-winner { color: var(--accent); }
+.wb-vrow-label { font-family: var(--mono); font-size: 12px; color: var(--muted); padding-top: 10px; min-width: 0; }
+.wb-vrow-label small { display: block; font-family: var(--font); color: var(--faint); font-size: 11px; }
+.wb-vcell { min-width: 0; }
+.wb-vcell .wb-figure img, .wb-vcell .wb-missing-box { aspect-ratio: 16 / 10; }
+.wb-vcell .wb-figure figcaption { font-size: 11px; }
+.wb-vcell.is-winner .wb-figure img { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+/* 实验页：逐图对照滑杆 */
+.wb-slider-case + .wb-slider-case { margin-top: 22px; }
+.wb-slider-top { display: flex; justify-content: space-between; gap: 16px; font-size: 12px; color: var(--muted); margin-bottom: 9px; }
+.wb-slider-keys { font-family: var(--mono); color: var(--faint); }
+.wb-slider { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+.wb-slider-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.wb-slider-clip { position: absolute; inset: 0; clip-path: inset(0 0 0 50%); }
+.wb-slider-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--accent); pointer-events: none; z-index: 2; }
+.wb-slider-range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; z-index: 3; }
+
 /* 表格 */
 .wb-table-label { font-size: 12px; color: var(--faint); margin-bottom: 8px; }
 .wb-table-wrap { overflow-x: auto; }

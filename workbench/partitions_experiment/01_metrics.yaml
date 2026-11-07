@@ -1,0 +1,9 @@
+no: "01"
+name: 指标汇总
+short: 指标
+kind: compare
+title: 逐变体汇总
+columns: [配置, clahe, psm, 平均置信度, 识别框, 人工核对]
+annotations: false
+folds:
+  - {title: 评测口径, body: "置信度取检测框得分均值，识别框为全部样本合计；人工核对按 06_ocr/calls.json 逐行确认，由标注同学完成。"}

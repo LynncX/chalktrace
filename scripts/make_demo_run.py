@@ -111,6 +111,30 @@ def main() -> None:
         sizes[f"media/07_items/crop_00{i}.png"] = put(
             f"media/07_items/crop_00{i}.png", board(420, 240, 30 + i, 2), "PNG")
 
+    # 每阶段的批量真实中间产物：用于验证 glob 自动发现（自然序 / limit / 缺失静默）
+    for i in range(1, 4):
+        sizes[f"media/01_frames/sample_{i:04d}.jpg"] = put(
+            f"media/01_frames/sample_{i:04d}.jpg", board(560, 360, 40 + i, 4), "JPEG", 70)
+        sizes[f"media/02_board/calib_{i:03d}.png"] = put(
+            f"media/02_board/calib_{i:03d}.png", board(640, 400, 50 + i, 3), "PNG")
+        sizes[f"media/03_pose/pose_frame_{i:03d}.jpg"] = put(
+            f"media/03_pose/pose_frame_{i:03d}.jpg", board(720, 420, 60 + i, 4), "JPEG", 70)
+        sizes[f"media/04_gate/fired_{i:03d}.jpg"] = put(
+            f"media/04_gate/fired_{i:03d}.jpg", board(560, 340, 70 + i, 3), "JPEG", 70)
+        sizes[f"media/05_enhance/frame_{i:03d}_color.jpg"] = put(
+            f"media/05_enhance/frame_{i:03d}_color.jpg", board(640, 400, 80 + i, 5), "JPEG", 76)
+        sizes[f"media/05_enhance/frame_{i:03d}_gray.png"] = put(
+            f"media/05_enhance/frame_{i:03d}_gray.png",
+            board(640, 400, 80 + i, 5).convert("L").convert("RGB"), "PNG")
+        sizes[f"media/06_ocr/overlay_{i:03d}.png"] = put(
+            f"media/06_ocr/overlay_{i:03d}.png", board(640, 400, 90 + i, 5), "PNG")
+        sizes[f"media/07_items/box_{i:03d}.png"] = put(
+            f"media/07_items/box_{i:03d}.png", board(480, 300, 100 + i, 3), "PNG")
+    sizes["media/08_notes/notes_compare.png"] = put(
+        "media/08_notes/notes_compare.png", board(900, 520, 110, 6), "PNG")
+    sizes["media/09_stats/funnel.png"] = put(
+        "media/09_stats/funnel.png", chart(900, 380, 111), "PNG")
+
     write_json("01_frames/frames.json", [
         {"frame": i * 15, "ts": round(i * 0.5, 1), "blur": round(60 + i * 3.7, 1),
          "kept": "是" if i % 4 else "否"} for i in range(8)

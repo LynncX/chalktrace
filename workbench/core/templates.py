@@ -5,19 +5,25 @@ kind 决定骨架，YAML 只提供数据：
     overview  大数字 + 阶段进度条 + 产物索引
     items     条目证据卡网格
     compare   对照表
+    variants  实验页：列=变体 / 行=样本，等尺寸对齐 + 逐图对照滑杆
 
 需要循环 / 条件 / 跨 tab 跳转时，可另写 partitions/*.py 暴露 TAB 或 render(ctx)。
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable
 
 from . import annotations, components as c
-from .assets import Asset
+from .assets import IMAGE_EXT, VIDEO_EXT, Asset
 
 _TabRender = Callable[[object], str]
 _ASSET_KEYS = {"path", "caption", "group", "alt", "mode", "poster"}
+_MEDIA_EXT = IMAGE_EXT | VIDEO_EXT | {".pdf"}
+_GLOB_DEFAULT_LIMIT = 24
+_VARIANT_DEFAULT_LIMIT = 12
 
 
 @dataclass
@@ -39,14 +45,47 @@ def ctx_no_group(ctx, spec: dict) -> str:
     return f"tab-{spec.get('__tab_no__', 'misc')}"
 
 
+def _natkey(s: str):
+    """自然序：frame_2 排在 frame_10 前面。"""
+    return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", s)]
+
+
+def _expand_glob(ctx, spec: dict) -> list:
+    """展开目录里的真实媒体文件；扫不到就静默跳过，不生成缺失占位、不反推。"""
+    root = ctx.root.resolve()
+    try:
+        candidates = list(ctx.root.glob(str(spec.get("glob", ""))))
+    except (ValueError, OSError, NotImplementedError):
+        return []
+    found = []
+    for p in candidates:
+        if not p.is_file() or p.suffix.lower() not in _MEDIA_EXT:
+            continue
+        try:                               # 必须 resolve：字符串 relative_to 拦不住 ".."
+            rel = p.resolve().relative_to(root).as_posix()
+        except ValueError:                 # 越出 run 目录，忽略
+            continue
+        found.append((rel, p))
+    found.sort(key=lambda pair: _natkey(Path(pair[0]).name))
+    caption = str(spec.get("caption", ""))
+    out = []
+    for rel, p in found[:int(spec.get("limit", _GLOB_DEFAULT_LIMIT))]:
+        item = {k: v for k, v in spec.items()
+                if k not in ("glob", "caption", "limit")}
+        item["path"] = rel
+        item["caption"] = caption.replace("{stem}", p.stem) if caption else p.stem
+        item["__tab_no__"] = spec.get("__tab_no__", "misc")
+        out.append(_asset(ctx, item))
+    return out
+
+
 def _figures(ctx, specs: list[dict], no: str) -> list:
     out = []
     for s in specs or []:
-        if not s.get("path"):
+        if not (s.get("path") or s.get("glob")):
             continue
-        s = dict(s)
-        s["__tab_no__"] = no
-        out.append(_asset(ctx, s))
+        s = dict(s, __tab_no__=no)
+        out.extend(_expand_glob(ctx, s) if s.get("glob") else [_asset(ctx, s)])
     return out
 
 
@@ -104,6 +143,8 @@ def _render_items(ctx, spec: dict) -> str:
             status=it.get("status", "done"),
         ))
     parts = [c.card("条目证据", c.card_grid(cards), badge=f"{len(cards)} 条")] if cards else []
+    parts.append(c.gallery(_figures(ctx, spec.get("figures", []), spec["no"]),
+                           cols=spec.get("cols")))
     parts.extend(_folds(spec.get("folds", [])))
     return c.card_stack(*parts)
 
@@ -121,11 +162,65 @@ def _render_compare(ctx, spec: dict) -> str:
     return c.card_stack(*parts)
 
 
+def _render_variants(ctx, spec: dict) -> str:
+    """实验页：同一批样本 × 多个参数变体，逐格放真实结果图并强制等尺寸对齐。"""
+    variants = list(ctx.manifest.get("variants") or [])
+    samples = list(ctx.manifest.get("samples") or [])[:int(spec.get("limit", _VARIANT_DEFAULT_LIMIT))]
+    winner = str(ctx.manifest.get("winner", "") or spec.get("winner", "") or "")
+    by_id = {str(v.get("id", v.get("name", ""))): v for v in variants}
+    no = spec["no"]
+    cache: dict[tuple[str, str], tuple] = {}
+
+    def figure(v: dict, sid: str):
+        vid = str(v.get("id", v.get("name", "")))
+        key = (vid, sid)
+        if key not in cache:
+            rel = (v.get("images") or {}).get(sid, "")
+            cap = str((v.get("captions") or {}).get(sid, ""))
+            a = ctx.asset(rel, caption=cap, alt=f"{sid} · {v.get('name', vid)}",
+                          group=f"exp-{no}-{sid}")   # 同一行图可横向翻页
+            cache[key] = (a, c.asset_figure(a))
+        return cache[key]
+
+    cells = {}
+    for s in samples:
+        sid = str(s.get("id", ""))
+        for v in variants:
+            vid = str(v.get("id", v.get("name", "")))
+            cells[(sid, vid)] = figure(v, sid)[1]
+
+    parts = [
+        c.metric_row([ctx.resolve_metric(m) for m in spec.get("metrics", [])]),
+        c.variant_grid(samples, variants, cells, winner=winner),
+    ]
+
+    # 首变体与选中变体的逐图对照滑杆；缺任一图就跳过该样本，不补图
+    if spec.get("slider") and winner in by_id and len(variants) > 1:
+        base = variants[0]
+        cases = []
+        for s in samples:
+            sid = str(s.get("id", ""))
+            a, _ = figure(base, sid)
+            b, _ = figure(by_id[winner], sid)
+            case = c.slider_pair(a, b, label=f"样本 {sid}",
+                                 label_a=str(base.get("name", "")),
+                                 label_b=str(by_id[winner].get("name", "")))
+            if case:
+                cases.append(case)
+        if cases:
+            parts.append(c.card("逐图对照", "".join(cases)))
+
+    parts.extend(_tables(ctx, spec.get("tables", [])))
+    parts.extend(_folds(spec.get("folds", [])))
+    return c.card_stack(*parts)
+
+
 _RENDERERS = {
     "stage": _render_stage,
     "overview": _render_overview,
     "items": _render_items,
     "compare": _render_compare,
+    "variants": _render_variants,
 }
 
 

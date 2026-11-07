@@ -7,6 +7,6 @@ metrics:
   - {label: 峰值内存, key: stages.09.metrics.mem_mb, unit: MB}
   - {label: OCR 调用, key: stages.06.metrics.calls}
 figures:
-  - {path: media/09_stats/timeline.png, caption: 阶段耗时}
+  - {glob: "media/09_stats/*.png", caption: "统计图表 · {stem}", limit: 12}
 tables:
   - {path: 09_stats/summary.json, columns: [stage, seconds, frames, note], title: 逐阶段统计}

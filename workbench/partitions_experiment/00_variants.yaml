@@ -1,0 +1,14 @@
+no: "00"
+name: 变体对照
+short: 对照
+kind: variants
+limit: 12
+slider: true
+annotations: false
+metrics:
+  - {key: variants|len, label: 变体}
+  - {key: samples|len, label: 样本}
+  - {key: stage_name, label: 阶段}
+folds:
+  - {title: 输入与口径, body: "所有变体共用同一批输入快照；每格是同一帧在不同参数下的真实结果图。列是变体、行是样本，图片等尺寸对齐；点击图片可放大并沿同一行翻页。"}
+  - {title: 结论与升格, body: "选中变体后把参数校准到 annotations/stages.yaml，再跑一次完整 run。实验目录属过程产物，可整目录删除；run 才是归档证据。"}
