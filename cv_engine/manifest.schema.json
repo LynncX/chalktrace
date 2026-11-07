@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "manifest.schema.json",
+  "title": "板书数字化 · 一次完整流水线（run）",
+  "type": "object",
+  "required": [
+    "run_id",
+    "video",
+    "stages"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "run"
+      ]
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "running",
+        "done",
+        "failed"
+      ]
+    },
+    "video": {
+      "type": "object",
+      "required": [
+        "frames",
+        "duration_s"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fps": {
+          "type": "number",
+          "minimum": 0
+        },
+        "duration_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "not": {
+        "required": [
+          "duration_sec"
+        ]
+      },
+      "additionalProperties": true
+    },
+    "config": {
+      "type": "object"
+    },
+    "stages": {
+      "type": "object",
+      "patternProperties": {
+        "^0[1-9]$": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "done",
+                "running",
+                "pending"
+              ]
+            },
+            "metrics": {
+              "type": "object"
+            },
+            "duration_s": {
+              "type": "number"
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item_id"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "first_seen_sec": {
+            "type": "number"
+          },
+          "last_seen_sec": {
+            "type": "number"
+          },
+          "frame": {
+            "type": "string"
+          },
+          "crop": {
+            "type": "string"
+          },
+          "ocr_link": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "done",
+              "running",
+              "pending"
+            ]
+          },
+          "bbox": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "evidence": {
+            "type": "object"
+          },
+          "archived": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "compare": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "size": {}
+        }
+      }
+    },
+    "outputs": {
+      "type": "object"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -9,6 +9,8 @@
 - `runs/<run_id>/manifest.json`（唯一数据入口）
 - 其中引用的产物文件，路径均相对该 run 目录
 
+字段权威是 `cv_engine/contracts.py`；推荐用 `cv_engine/writer.py` 落盘（原子写、逐阶段更新、路径校验），`cv_engine/schema.py` 的 `validate_manifest()` 自检。完整用法：`scripts/make_contract_demo.py`。
+
 字段名与路径名硬编码在 `workbench/partitions/*.yaml`，改名需同步改 YAML。可照抄的样例：`workbench/fixtures/demo_mock/manifest.json`。manifest 其余字段页面不消费，可自由扩展。
 
 ## manifest.json
