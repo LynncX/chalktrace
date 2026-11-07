@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>板书拾记 · 小程序课程页（B 纸感学术 复刻）</title>
+<link rel="stylesheet" href="./base.css">
+<style>
+body { display: flex; justify-content: center; padding: 36px 0 44px; }
+.phone {
+  width: 375px; height: 760px; background: var(--card);
+  border: 1px solid var(--line); border-radius: 30px;
+  box-shadow: 0 10px 34px rgba(60,52,30,.14);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.navbar {
+  display: flex; align-items: center; justify-content: center;
+  position: relative; padding: 10px 14px 10px; border-bottom: 1px solid var(--line);
+}
+.navbar .title { font-family: var(--serif); font-size: 16.5px; color: var(--ink); }
+.navbar .capsule { position: absolute; right: 14px; }
+.capsule svg { width: 15px; height: 15px; fill: var(--ink-2); stroke: none; }
+.capsule .dot { border-radius: 50%; width: 15px; height: 15px; border: 1.5px solid var(--ink-2); position: relative; }
+.capsule .dot::after { content: ""; position: absolute; inset: 3.5px; border-radius: 50%; background: var(--ink-2); }
+
+.page { flex: 1; padding: 20px 18px 0; overflow: hidden; display: flex; flex-direction: column; }
+.page-title { font-family: var(--serif); font-size: 27px; margin-bottom: 4px; }
+.underline { width: 34px; height: 3px; background: var(--green); border-radius: 1px; margin-bottom: 16px; }
+.upload-btn {
+  display: flex; align-items: center; justify-content: center; gap: .5em;
+  background: var(--green); color: #F6F3E6; border-radius: 9px;
+  padding: 12px; font-size: 15px; margin-bottom: 22px; cursor: pointer;
+}
+.upload-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.course-card {
+  display: flex; align-items: center; gap: 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: #FFFDF6;
+  padding: 12px; cursor: pointer;
+}
+.course-card:hover { border-color: var(--green-line); background: var(--green-soft); }
+.cover {
+  width: 86px; height: 64px; flex: none; border-radius: 6px; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 12px; line-height: 1.5; text-align: center;
+}
+.cover .m { margin-top: 3px; font-size: 13px; }
+.cc-body { flex: 1; min-width: 0; }
+.cc-body h3 { font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+.cc-body .meta { font-size: 12px; color: var(--ink-2); }
+.cc-chev { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--ink-3); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="statusbar">
+    <span>10:24</span>
+    <span class="icons">
+      <svg width="17" height="11" viewBox="0 0 17 11"><g fill="#26251F"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="2.5" width="3" height="8.5" rx="0.8"/><rect x="13.5" y="0" width="3" height="11" rx="0.8"/></g></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 9.5l3.4-3.9a5.2 5.2 0 00-6.8 0zM12.3 4a7.6 7.6 0 00-9.6 0L1.2 2.3a9.9 9.9 0 0112.6 0z" fill="#26251F"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11"><rect x="0.5" y="0.5" width="19" height="10" rx="2.5" fill="none" stroke="#26251F" stroke-opacity="0.4"/><rect x="2" y="2" width="14" height="7" rx="1.2" fill="#26251F"/><rect x="21" y="3.5" width="1.6" height="4" rx="0.8" fill="#26251F" fill-opacity="0.4"/></svg>
+    </span>
+  </div>
+
+  <div class="navbar">
+    <span class="title">板书拾记</span>
+    <span class="capsule"><span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></span><span><span class="dot"></span></span></span>
+  </div>
+
+  <div class="page">
+    <div class="page-title">课程</div>
+    <div class="underline"></div>
+
+    <div class="upload-btn">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
+      上传视频
+    </div>
+
+    <div class="course-card">
+      <div class="board cover">
+        <span class="frame-light"></span>
+        <span>高等数学</span>
+        <span class="chalk-math m">∫<sub>a</sub><sup>b</sup> f(x) dx</span>
+      </div>
+      <div class="cc-body">
+        <h3>高等数学 · 定积分</h3>
+        <div class="meta">8 条笔记</div>
+      </div>
+      <svg class="cc-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active">
+      <svg viewBox="0 0 24 24"><path d="M12 5.5C10.2 4 7.8 3.5 4.5 3.5v14c3.3 0 5.7.5 7.5 2 1.8-1.5 4.2-2 7.5-2v-14c-3.3 0-5.7.5-7.5 2z"/><path d="M12 5.5v14"/></svg>
+      课程
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24"><path d="M6 3.5h9.5L19 7v13.5H6z"/><path d="M15 3.5V7h3.5M9 11.5h6M9 15h6"/></svg>
+      笔记
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.2 3.9-5 7-5s5.8 1.8 7 5"/></svg>
+      我的
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

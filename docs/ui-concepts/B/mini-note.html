@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>板书拾记 · 小程序笔记页（B 纸感学术 复刻）</title>
+<link rel="stylesheet" href="./base.css">
+<style>
+body { display: flex; justify-content: center; padding: 36px 0 44px; }
+.phone {
+  width: 375px; height: 760px; background: var(--card);
+  border: 1px solid var(--line); border-radius: 30px;
+  box-shadow: 0 10px 34px rgba(60,52,30,.14);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.navbar {
+  display: flex; align-items: center; justify-content: center;
+  position: relative; padding: 10px 14px; border-bottom: 1px solid var(--line);
+}
+.navbar .back {
+  position: absolute; left: 14px; width: 18px; height: 18px;
+  fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.navbar .title { font-family: var(--serif); font-size: 16.5px; }
+.navbar .capsule { position: absolute; right: 14px; }
+.capsule svg { width: 15px; height: 15px; fill: var(--ink-2); stroke: none; }
+.capsule .dot { border-radius: 50%; width: 15px; height: 15px; border: 1.5px solid var(--ink-2); position: relative; }
+.capsule .dot::after { content: ""; position: absolute; inset: 3.5px; border-radius: 50%; background: var(--ink-2); }
+
+.page { flex: 1; padding: 14px 18px 0; overflow: hidden; }
+.page-title { font-family: var(--serif); font-size: 24px; margin-bottom: 8px; }
+.crumbs {
+  display: flex; align-items: center; font-size: 13px; color: var(--ink-2);
+  padding-bottom: 9px; border-bottom: 1px solid var(--line); margin-bottom: 12px;
+}
+.crumbs svg { width: 14px; height: 14px; fill: none; stroke: var(--ink-3); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; margin-left: auto; }
+
+h3.sec { font-size: 18px; margin-bottom: 8px; }
+.note-p { font-size: 13.5px; text-align: justify; }
+.formula-center { text-align: center; font-size: 15px; margin: 8px 0; }
+.defline { font-size: 13.5px; text-align: justify; margin-bottom: 7px; }
+.formula-card {
+  background: var(--green-soft); border: 1px solid var(--green-line); border-radius: 6px;
+  padding: 9px; text-align: center; font-size: 14px;
+}
+
+.origin { margin-top: 13px; }
+.origin h3 { font-size: 15px; margin-bottom: 8px; }
+.origin h3 small { font-family: var(--sans); font-weight: 400; color: var(--ink-3); font-size: 12px; }
+.origin .board { height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12.5px; line-height: 1.8; padding: 0 14px; text-align: center; }
+.origin-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.play-chip {
+  display: inline-flex; align-items: center; gap: .45em;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+  padding: 7px 14px; font-size: 12.5px; color: var(--ink); cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.play-chip svg { width: 12px; height: 12px; fill: var(--green); stroke: none; }
+.origin-foot .spacer { flex: 1; }
+.export-btn {
+  display: inline-flex; align-items: center; gap: .45em;
+  background: var(--green); color: #F6F3E6; border-radius: 9px;
+  padding: 7px 15px; font-size: 13px; cursor: pointer;
+}
+.export-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="statusbar">
+    <span>10:24</span>
+    <span class="icons">
+      <svg width="17" height="11" viewBox="0 0 17 11"><g fill="#26251F"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="2.5" width="3" height="8.5" rx="0.8"/><rect x="13.5" y="0" width="3" height="11" rx="0.8"/></g></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 9.5l3.4-3.9a5.2 5.2 0 00-6.8 0zM12.3 4a7.6 7.6 0 00-9.6 0L1.2 2.3a9.9 9.9 0 0112.6 0z" fill="#26251F"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11"><rect x="0.5" y="0.5" width="19" height="10" rx="2.5" fill="none" stroke="#26251F" stroke-opacity="0.4"/><rect x="2" y="2" width="14" height="7" rx="1.2" fill="#26251F"/><rect x="21" y="3.5" width="1.6" height="4" rx="0.8" fill="#26251F" fill-opacity="0.4"/></svg>
+    </span>
+  </div>
+
+  <div class="navbar">
+    <svg class="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+    <span class="title">板书拾记</span>
+    <span class="capsule"><span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></span><span><span class="dot"></span></span></span>
+  </div>
+
+  <div class="page">
+    <div class="page-title">笔记</div>
+    <div class="crumbs">
+      <span>高等数学 · 定积分</span>
+      <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+    </div>
+
+    <h3 class="sec sec-bar">定积分的定义</h3>
+    <p class="note-p">设 <span class="math">f(x)</span> 在 <span class="math">[a,b]</span> 上连续，将 <span class="math">[a,b]</span> 等分为 <span class="math">n</span> 份，<span class="math">Δx = <span class="frac"><span class="num">b − a</span><span class="den">n</span></span></span>，取 <span class="math">ξ<sub>i</sub> ∈ [x<sub>i−1</sub>, x<sub>i</sub>]</span>，构造和式</p>
+    <div class="formula-center math"><i>S</i><sub>n</sub> = <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx .</div>
+    <p class="defline"><span class="pill">定义</span>若极限 <span class="math"><span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <i>S</i><sub>n</sub></span> 存在，则称该极限为 <span class="math">f(x)</span> 在 <span class="math">[a,b]</span> 上的定积分，记为</p>
+    <div class="formula-card math"><span class="bigop"><span class="hi">b</span><span class="sym">∫</span><span class="lo">a</span></span> f(x) dx = <span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx .</div>
+
+    <div class="origin">
+      <h3 class="sec-bar">原始板书<small>（证据）</small></h3>
+      <div class="board">
+        <span class="frame-light"></span>
+        <span>定义&ensp;若极限 <span class="chalk-math"><span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <i>S</i><sub>n</sub></span> 存在，则称该极限为</span>
+        <span><span class="chalk-math">f(x)</span> 在 <span class="chalk-math">[a,b]</span> 上的定积分，记为</span>
+        <span class="chalk-math"><span class="bigop"><span class="hi">b</span><span class="sym">∫</span><span class="lo">a</span></span> f(x) dx = <span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx .</span>
+      </div>
+      <div class="origin-foot">
+        <span class="play-chip">
+          <svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg>
+          06:24
+        </span>
+        <span class="spacer"></span>
+        <span class="export-btn">
+          <svg viewBox="0 0 24 24"><path d="M12 4v12m0 0l5-5m-5 5l-5-5M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
+          导出 PDF
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab">
+      <svg viewBox="0 0 24 24"><path d="M12 5.5C10.2 4 7.8 3.5 4.5 3.5v14c3.3 0 5.7.5 7.5 2 1.8-1.5 4.2-2 7.5-2v-14c-3.3 0-5.7.5-7.5 2z"/><path d="M12 5.5v14"/></svg>
+      课程
+    </div>
+    <div class="tab active">
+      <svg viewBox="0 0 24 24"><path d="M6 3.5h9.5L19 7v13.5H6z"/><path d="M15 3.5V7h3.5M9 11.5h6M9 15h6"/></svg>
+      笔记
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.2 3.9-5 7-5s5.8 1.8 7 5"/></svg>
+      我的
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
