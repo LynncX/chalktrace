@@ -1,0 +1,14 @@
+no: "04"
+name: 变化检测与门控
+short: 门控
+kind: stage
+metrics:
+  - {label: 候选帧, key: stages.01.metrics.sampled}
+  - {label: 门控放行, key: stages.04.metrics.passed}
+  - {label: 放行率, key: stages.04.metrics.pass_rate, unit: "%"}
+figures:
+  - {path: media/04_gate/ssim_chart.png, caption: SSIM / 清晰度曲线}
+tables:
+  - {path: 04_gate/gate.json, columns: [frame, ts, ssim, clarity, fired], title: 门控记录}
+folds:
+  - {title: 阈值口径, body: "SSIM < 0.88 且 clarity ≥ 0.45，并满足 30 帧冷却（约 15 s）；遮挡超阈值直接跳过。"}

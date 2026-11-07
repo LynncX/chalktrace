@@ -1,0 +1,13 @@
+no: "00"
+name: 运行总览
+short: 总览
+kind: overview
+metrics:
+  - {label: 视频时长, key: video.duration_s, unit: s}
+  - {label: 抽帧, key: stages.01.metrics.sampled}
+  - {label: 门控放行, key: stages.04.metrics.passed}
+  - {label: 条目, key: "items|len"}
+figures:
+  - {path: media/01_frames/contact_sheet.jpg, caption: 课堂视频接触表}
+folds:
+  - {title: 关于本次运行, body: "示例数据，仅用于校验工作台版式与产物契约；真实运行由 cv_engine 逐阶段写入 manifest.json。"}

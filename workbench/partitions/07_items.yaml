@@ -1,0 +1,6 @@
+no: "07"
+name: 板书条目与证据
+short: 条目
+kind: items
+folds:
+  - {title: 条目归并规则, body: "同一文本在连续快照中重复出现时合并为一条，记录 first_seen / last_seen / best_ocr_call；默认视图只展示条目与原帧，帧号与 bbox 在放大后可见。"}

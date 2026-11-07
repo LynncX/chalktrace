@@ -1,0 +1,8 @@
+no: "10"
+name: 配置对照
+short: 对照
+kind: compare
+title: A/B/C/D 配置对照
+columns: [配置, 门控策略, OCR 调用, 条目数, 人工核对]
+folds:
+  - {title: 评测口径, body: "A 为基础项目原始链路；B/C/D 依次替换门控与归并策略。条目数按 first_seen 去重，人工核对由标注同学完成。"}

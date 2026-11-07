@@ -1,0 +1,11 @@
+no: "08"
+name: 课堂笔记
+short: 笔记
+kind: stage
+metrics:
+  - {label: 段落, key: stages.08.metrics.sections}
+  - {label: 字数, key: stages.08.metrics.chars}
+figures:
+  - {path: 08_notes/notes.md, caption: 结构化笔记（内联正文）}
+folds:
+  - {title: 生成方式, body: "按首见时间排序条目，按 Board Section 分段；不调用大模型改写，保留 OCR 原文以便核验。"}

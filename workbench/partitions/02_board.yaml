@@ -1,0 +1,11 @@
+no: "02"
+name: 白板区域定位
+short: 白板
+kind: stage
+metrics:
+  - {label: 定位帧, key: stages.02.metrics.located}
+  - {label: 平均置信度, key: stages.02.metrics.confidence}
+figures:
+  - {path: media/02_board/roi.png, caption: 透视校正后的 ROI}
+folds:
+  - {title: 校正方法, body: "边缘检测 + 轮廓筛选取最大四边形，透视变换到固定画幅；失败帧沿用上一帧的单应矩阵。"}

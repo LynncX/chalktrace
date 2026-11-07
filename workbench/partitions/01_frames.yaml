@@ -1,0 +1,15 @@
+no: "01"
+name: 抽帧与质量筛选
+short: 抽帧
+kind: stage
+metrics:
+  - {label: 原始帧, key: video.frames}
+  - {label: 采样帧, key: stages.01.metrics.sampled}
+  - {label: 模糊丢弃, key: stages.01.metrics.blur_dropped}
+figures:
+  - {path: media/01_frames/sample_0000.jpg, caption: 采样帧}
+  - {path: media/01_frames/contact_sheet.jpg, caption: 全片接触表}
+tables:
+  - {path: 01_frames/frames.json, columns: [frame, ts, blur, kept], title: 抽帧明细}
+folds:
+  - {title: 采样口径, body: "FRAME_SKIP=15，30 fps 下约每 0.5 s 取一帧；拉普拉斯方差低于阈值时丢弃。"}

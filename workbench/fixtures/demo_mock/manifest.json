@@ -1,0 +1,40 @@
+{
+  "run_id": "demo_mock",
+  "title": "板书数字化 · 示例运行",
+  "created_at": "2026-11-07 15:00",
+  "video": {"name": "test_video.mp4", "frames": 33528, "fps": 30, "duration_s": 1117.62},
+  "stages": {
+    "01": {"name": "抽帧", "status": "done", "metrics": {"sampled": 2236, "blur_dropped": 0}},
+    "02": {"name": "白板定位", "status": "done", "metrics": {"located": 2236, "confidence": 0.93}},
+    "03": {"name": "教师行为", "status": "done", "metrics": {"pose_frames": 2236, "occluded": 418}},
+    "04": {"name": "门控", "status": "done", "metrics": {"passed": 17, "pass_rate": 0.8}},
+    "05": {"name": "增强", "status": "done", "metrics": {"snapshots": 17, "clarity": 0.71}},
+    "06": {"name": "OCR", "status": "done", "metrics": {"calls": 17, "boxes": 143, "score": 0.89}},
+    "07": {"name": "条目归并", "status": "running", "metrics": {"items": 4}},
+    "08": {"name": "笔记", "status": "running", "metrics": {"sections": 6, "chars": 1284}},
+    "09": {"name": "统计", "status": "pending", "metrics": {"elapsed_s": 742.5, "mem_mb": 1860}}
+  },
+  "items": [
+    {"item_id": "IT-001", "text": "卷积与池化", "first_seen_sec": 120.5, "last_seen_sec": 305.0, "frame": "media/07_items/frame_001.jpg", "crop": "media/07_items/crop_001.png", "ocr_link": "#06", "status": "done"},
+    {"item_id": "IT-002", "text": "反向传播与链式法则", "first_seen_sec": 318.0, "last_seen_sec": 512.5, "frame": "media/07_items/frame_002.jpg", "crop": "media/07_items/crop_002.png", "ocr_link": "#06", "status": "done"},
+    {"item_id": "IT-003", "text": "梯度下降与学习率", "first_seen_sec": 640.0, "last_seen_sec": 828.0, "frame": "media/07_items/frame_003.jpg", "crop": "media/07_items/crop_003.png", "ocr_link": "#06", "status": "done"},
+    {"item_id": "IT-004", "text": "过拟合与正则化", "first_seen_sec": 905.0, "last_seen_sec": 1080.0, "frame": "media/07_items/frame_004.jpg", "crop": "media/07_items/crop_004.png", "ocr_link": "#06", "status": "running"}
+  ],
+  "compare": [
+    {"配置": "A 原始链路", "门控策略": "固定间隔", "OCR 调用": 2236, "条目数": 61, "人工核对": "未做"},
+    {"配置": "B 变化检测", "门控策略": "SSIM < 0.88", "OCR 调用": 94, "条目数": 34, "人工核对": "抽样"},
+    {"配置": "C 分区门控", "门控策略": "SSIM + 遮挡", "OCR 调用": 17, "条目数": 12, "人工核对": "全量"},
+    {"配置": "D 分区 + 短时保留", "门控策略": "SSIM + 遮挡 + 时效", "OCR 调用": 23, "条目数": 14, "人工核对": "全量"}
+  ],
+  "files": [
+    {"path": "manifest.json", "size": "4 KB"},
+    {"path": "01_frames/frames.json", "size": "1 KB"},
+    {"path": "04_gate/gate.json", "size": "1 KB"},
+    {"path": "06_ocr/calls.json", "size": "2 KB"},
+    {"path": "08_notes/notes.md", "size": "1 KB"},
+    {"path": "09_stats/summary.json", "size": "1 KB"},
+    {"path": "media/01_frames/contact_sheet.jpg", "size": "420 KB"},
+    {"path": "media/05_enhance/board_017.png", "size": "610 KB"},
+    {"path": "media/05_enhance/board_full.png", "size": "3.1 MB"}
+  ]
+}

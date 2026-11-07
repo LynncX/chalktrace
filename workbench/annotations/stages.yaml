@@ -1,0 +1,75 @@
+# 阶段实现标注 —— 唯一需要人工维护的文件。
+# 键须与 partitions/*.yaml 的 no 一致，且必须加引号：YAML 1.1 会把 01 当成八进制整数。
+# 字段：files 代码文件 / funcs 核心函数（字符串或 {name, note}）/ params 核心参数 / note 自由备注。
+# params 的键避开 on/off/yes/no 等 YAML 1.1 裸键；含 < > 的值请加引号。
+# 以下按开题方案预填草稿；cv_engine 实现完成后把 draft 改为 false 并按实际改名。
+
+"01":
+  draft: true
+  files: [cv_engine/stages/s01_frames.py]
+  funcs:
+    - {name: extract_frames(), note: 按间隔抽帧}
+    - {name: blur_score(), note: 拉普拉斯方差筛模糊}
+  params: {FRAME_SKIP: 15, BLUR_VAR_MIN: 待定}
+
+"02":
+  draft: true
+  files: [cv_engine/stages/s02_board.py]
+  funcs:
+    - {name: locate_board(), note: 白板四角透视定位}
+    - {name: warp_roi(), note: 透视矫正}
+  params: {MIN_QUAD_AREA: 待定}
+
+"03":
+  draft: true
+  files: [cv_engine/stages/s03_pose.py]
+  funcs:
+    - {name: detect_pose(), note: YOLOv8n-pose}
+    - {name: occlusion_iou(), note: 人体框与白板 ROI 交并比}
+  params: {OCCLUSION_IOU: 0.30}
+
+"04":
+  draft: true
+  files: [cv_engine/stages/s04_gate.py]
+  funcs:
+    - {name: partition_gate(), note: 分区门控 + 短时可见板书保留}
+    - {name: ssim_delta(), note: 变化检测}
+  params: {SSIM_MAX: 0.88, COOLDOWN_FRAMES: 30, CLARITY_MIN: 0.45, OCCLUSION_SKIP: 0.30}
+  note: 阈值取自开题方案，待实测校准。
+
+"05":
+  draft: true
+  files: [cv_engine/stages/s05_enhance.py]
+  funcs:
+    - {name: enhance_board(), note: 灰度化 / 自适应增强}
+    - {name: save_color_frame(), note: 同时保留原彩色帧供核验}
+  params: {CLARITY_MIN: 0.45}
+
+"06":
+  draft: true
+  files: [cv_engine/stages/s06_ocr.py]
+  funcs:
+    - {name: recognize(), note: PaddleOCR，落盘 poly/score/frame/ts}
+  params: {LANG: ch, SCORE_MIN: 待定}
+
+"07":
+  draft: true
+  files: [cv_engine/stages/s07_items.py]
+  funcs:
+    - {name: merge_items(), note: 连续快照去重，记录首见/末见}
+    - {name: bind_evidence(), note: 绑定原帧、裁剪与 OCR 原文}
+  params: {DEDUP_WINDOW_S: 待定}
+
+"08":
+  draft: true
+  files: [cv_engine/stages/s08_notes.py]
+  funcs:
+    - {name: build_notes(), note: 按首见时间排序并分段，不改写 OCR 原文}
+  params: {}
+
+"09":
+  draft: true
+  files: [cv_engine/stages/s09_stats.py]
+  funcs:
+    - {name: collect_stats(), note: 逐阶段耗时 / 帧数 / 峰值内存}
+  params: {}

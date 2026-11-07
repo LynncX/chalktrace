@@ -1,0 +1,14 @@
+no: "06"
+name: 文字识别
+short: OCR
+kind: stage
+metrics:
+  - {label: OCR 调用, key: stages.06.metrics.calls}
+  - {label: 识别框, key: stages.06.metrics.boxes}
+  - {label: 平均置信度, key: stages.06.metrics.score}
+figures:
+  - {path: media/06_ocr/overlay_017.png, caption: 识别框叠加}
+tables:
+  - {path: 06_ocr/calls.json, columns: [call, frame, ts, text, score], title: 识别结果}
+folds:
+  - {title: 识别口径, body: "PaddleOCR 中英文模型；poly / score / frame / ts 四项随每次调用落盘，供条目证据回溯。"}

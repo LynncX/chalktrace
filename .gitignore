@@ -1,0 +1,86 @@
+# ============================================================
+# 视觉课设 · 根仓库
+# 原则：配置 / 文档 / 代码 / 标注进版本库；
+#       运行时产物、视频、模型权重、密钥不进。
+# ============================================================
+
+# --- 环境与依赖 ---
+.pixi/*
+!.pixi/config.toml
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+dist/
+
+# --- 运行时产物：由流水线重建，不入库 ---
+runs/*
+!runs/.gitkeep
+
+# --- 数据与视频：体积大 / 含师生肖像 ---
+data/videos/*
+!data/videos/.gitkeep
+# 授权书含个人信息，默认不入库；确需提交脱敏件时用 git add -f
+data/consent/*
+!data/consent/.gitkeep
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# --- 模型权重：按需下载 ---
+*.pt
+*.pth
+*.onnx
+*.pdparams
+*.pdmodel
+
+# --- 密钥与本机配置 ---
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# --- 日志、缓存与临时文件 ---
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+.idea/
+.cache/
+.paddlex/
+
+# --- 本地工具状态：不参与版本库 ---
+# 会话记忆 / 助手配置属于本机状态；项目级 skills 仍可正常提交
+.workbuddy/
+.agents/
+.claude/
+.codex/
+.context/
+
+# --- 独立仓库与归档目录 ---
+# 基础项目有自己的 .git 与 2.7G 视频，作为 baseline A 独立冻结保留；
+# 不纳入根仓库，否则 git add . 会把它当成 gitlink 加进来。
+WhiteBoard-Digitization-Activity-Monitoring-System/
+# 开题汇报
+开题汇报
+# 指向上述目录的本机软链接：目标不入库，链接也不该入库，否则 clone 后是悬空链接
+板书数字化_重构汇报
+# 已废弃的重构汇报旧版
+.板书数字化_重构汇报(已废弃,不需要读取)/
+# 原始收件箱
+inbox
+
+information/
+skills-lock.json
+
+#
+*.pptx
+

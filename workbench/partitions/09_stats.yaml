@@ -1,0 +1,12 @@
+no: "09"
+name: 运行统计
+short: 统计
+kind: stage
+metrics:
+  - {label: 总耗时, key: stages.09.metrics.elapsed_s, unit: s}
+  - {label: 峰值内存, key: stages.09.metrics.mem_mb, unit: MB}
+  - {label: OCR 调用, key: stages.06.metrics.calls}
+figures:
+  - {path: media/09_stats/timeline.png, caption: 阶段耗时}
+tables:
+  - {path: 09_stats/summary.json, columns: [stage, seconds, frames, note], title: 逐阶段统计}

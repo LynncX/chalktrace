@@ -1,0 +1,5 @@
+# 工作台生成器依赖（CV 引擎不依赖这些）
+# 安装：pip install -r workbench/requirements.txt
+PyYAML>=6.0
+# Pillow 只用于 tiered 模式的缩略图；未安装时自动降级为原图内嵌
+Pillow>=10.0
