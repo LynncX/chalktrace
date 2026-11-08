@@ -12,4 +12,4 @@ figures:
 tables:
   - {path: 06_ocr/calls.json, columns: [call, frame, ts, text, score], title: 识别结果}
 folds:
-  - {title: 识别口径, body: "PaddleOCR 中英文模型；poly / score / frame / ts 四项随每次调用落盘，供条目证据回溯。"}
+  - {title: 识别口径, body: "PaddleOCR 模型名与阈值见 config.yaml。最小流水线 boxes.json 中 poly 属于校正板书坐标，source_poly 属于原视频帧坐标；frame / ts / ocr_call 与输入图路径同时保留。"}

@@ -2,23 +2,24 @@
 # 键须与 partitions/*.yaml 的 no 一致，且必须加引号：YAML 1.1 会把 01 当成八进制整数。
 # 字段：files 代码文件 / funcs 核心函数（字符串或 {name, note}）/ params 核心参数 / note 自由备注。
 # params 的键避开 on/off/yes/no 等 YAML 1.1 裸键；含 < > 的值请加引号。
-# 以下按开题方案预填草稿；cv_engine 实现完成后把 draft 改为 false 并按实际改名。
+# draft=false 表示已有最小实现；具体能力边界见 note，不能等同完整开题方案。
 
 "01":
-  draft: true
+  draft: false
   files: [cv_engine/stages/s01_frames.py]
   funcs:
     - {name: extract_frames(), note: 按间隔抽帧}
     - {name: blur_score(), note: 拉普拉斯方差筛模糊}
-  params: {FRAME_SKIP: 15, BLUR_VAR_MIN: 待定}
+  params: {sample_interval_s: 5, max_frames: 3, blur_min: 0}
+  note: 固定间隔采样，默认不丢模糊帧；真实参数以每次 config.yaml 为准。
 
 "02":
-  draft: true
+  draft: false
   files: [cv_engine/stages/s02_board.py]
   funcs:
-    - {name: locate_board(), note: 白板四角透视定位}
-    - {name: warp_roi(), note: 透视矫正}
-  params: {MIN_QUAD_AREA: 待定}
+    - {name: locate_board(), note: 人工 ROI / 四角透视校正 / 全帧直通}
+  params: {roi: 可选, corners: 可选}
+  note: 自动定位尚未实现；无标定时不计为定位成功。标定矩阵支持 OCR 框映射回原帧。
 
 "03":
   draft: true
@@ -38,19 +39,20 @@
   note: 阈值取自开题方案，待实测校准。
 
 "05":
-  draft: true
+  draft: false
   files: [cv_engine/stages/s05_enhance.py]
   funcs:
     - {name: enhance_board(), note: 灰度化 / 自适应增强}
-    - {name: save_color_frame(), note: 同时保留原彩色帧供核验}
-  params: {CLARITY_MIN: 0.45}
+  params: {enhance: clahe 或 none}
+  note: 温和灰度 CLAHE，不缩放、不二值化；校正后的原彩色图同时保留。
 
 "06":
-  draft: true
-  files: [cv_engine/stages/s06_ocr.py]
+  draft: false
+  files: [cv_engine/adapters/ocr.py, cv_engine/pipeline.py]
   funcs:
-    - {name: recognize(), note: PaddleOCR，落盘 poly/score/frame/ts}
-  params: {LANG: ch, SCORE_MIN: 待定}
+    - {name: OcrEngine.recognize(), note: PaddleOCR，落盘 poly/score/frame/ts}
+  params: {det_model: PP-OCRv5_server_det, rec_model: PP-OCRv5_server_rec, score_min: 0}
+  note: 单次运行复用模型；poly 是校正板书坐标，source_poly 是原帧坐标，叠加图展示原帧上的框。
 
 "07":
   draft: true
@@ -61,15 +63,16 @@
   params: {DEDUP_WINDOW_S: 待定}
 
 "08":
-  draft: true
-  files: [cv_engine/stages/s08_notes.py]
+  draft: false
+  files: [cv_engine/pipeline.py]
   funcs:
-    - {name: build_notes(), note: 按首见时间排序并分段，不改写 OCR 原文}
+    - {name: run(), note: 按采样时间串联原文，输出 Markdown / TXT}
   params: {}
+  note: 最小原文汇总，不做条目跟踪、跨帧去重或 PDF 导出。
 
 "09":
-  draft: true
-  files: [cv_engine/stages/s09_stats.py]
+  draft: false
+  files: [cv_engine/pipeline.py]
   funcs:
-    - {name: collect_stats(), note: 逐阶段耗时 / 帧数 / 峰值内存}
+    - {name: run(), note: 逐阶段耗时 / 帧数 / 进程累计峰值内存}
   params: {}

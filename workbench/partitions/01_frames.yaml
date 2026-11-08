@@ -12,4 +12,4 @@ figures:
 tables:
   - {path: 01_frames/frames.json, columns: [frame, ts, blur, kept], title: 抽帧明细}
 folds:
-  - {title: 采样口径, body: "FRAME_SKIP=15，30 fps 下约每 0.5 s 取一帧；拉普拉斯方差低于阈值时丢弃。"}
+  - {title: 采样口径, body: "最小流水线按配置中的起止时间、采样秒间隔与候选上限取帧；拉普拉斯方差低于 blur_min 时丢弃。具体参数见本次 config.yaml 与阶段说明。"}

@@ -1,0 +1,12 @@
+# 测试素材人工矩形标定；不代表自动定位或适用于其他视频。
+start_s: 120
+end_s: 131
+sample_interval_s: 5
+max_frames: 3
+blur_min: 0
+roi: [0, 18, 1280, 620]
+enhance: clahe
+det_model: PP-OCRv5_server_det
+rec_model: PP-OCRv5_server_rec
+score_min: 0
+cpu_threads: 4

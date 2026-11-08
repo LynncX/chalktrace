@@ -8,4 +8,4 @@ metrics:
 figures:
   - {glob: "media/02_board/*.png", caption: "标定 / 校正 / bbox · {stem}", limit: 18}
 folds:
-  - {title: 校正方法, body: "边缘检测 + 轮廓筛选取最大四边形，透视变换到固定画幅；失败帧沿用上一帧的单应矩阵。"}
+  - {title: 校正方法, body: "最小流水线支持人工 ROI 或四角透视校正；未提供标定时全帧直通，不计为定位成功。模式与原帧到校正图的矩阵记录在 02_board/calibration.json；尚未实现自动定位。"}

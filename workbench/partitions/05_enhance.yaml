@@ -9,4 +9,4 @@ figures:
   - {glob: "media/05_enhance/*_color.jpg", caption: "原彩色帧 · {stem}", limit: 18}
   - {glob: "media/05_enhance/*.png", caption: "增强 / 全分辨率 · {stem}", limit: 18}
 folds:
-  - {title: 增强链路, body: "灰度化 → CLAHE → 自适应二值化 → 去噪；增强图送 OCR，原彩色帧留作证据。"}
+  - {title: 增强链路, body: "最小流水线提供灰度 CLAHE 或 none 原彩色直通；不缩放、不二值化。实际模式见 config.yaml；校正后的彩色图与 OCR 输入均保留，增强图坐标与校正区域一致。"}
