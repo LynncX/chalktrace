@@ -5,7 +5,23 @@ name = "视觉课设"
 platforms = ["linux-64"]
 version = "0.1.0"
 
+[activation.env]
+PADDLE_PDX_CACHE_HOME = "$PIXI_PROJECT_ROOT/.cache/paddlex"
+PADDLE_HOME = "$PIXI_PROJECT_ROOT/.cache/paddle"
+PADDLEOCR_HOME = "$PIXI_PROJECT_ROOT/.cache/paddleocr"
+HF_HOME = "$PIXI_PROJECT_ROOT/.cache/huggingface"
+XDG_CACHE_HOME = "$PIXI_PROJECT_ROOT/.cache"
+
 [tasks]
+ocr-smoke = "python scripts/smoke_ocr.py"
 
 [dependencies]
 python = "3.12.*"
+numpy = ">=2,<2.4"
+pyyaml = "==6.0.2"
+pillow = ">=13.0.0,<14"
+
+[pypi-dependencies]
+paddlepaddle = ">=3.3.1, <4"
+paddleocr = ">=3.5.0, <3.6"
+opencv-contrib-python = ">=4.10, <5"
