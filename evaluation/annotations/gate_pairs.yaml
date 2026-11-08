@@ -1,0 +1,52 @@
+# 2026-11-08 人工检查原视频端点；只标注变化类型，不含 OCR 文字真值。
+# ROI 选取无教师遮挡的标题/书写行，用于隔离验证变化组件，不代表全板端到端效果。
+video: ../../data/videos/test_video.mp4
+description: 真实视频帧对的变化组件验证；假定参考图已执行 OCR，不调用 OCR 或人体检测。静态/新增使用无遮挡文字 ROI；场景切换单列，不冒充擦除。
+missing_real_categories: [erase]
+config:
+  gate_mode: change
+  cooldown_s: 0
+  max_gap_s: 300
+cases:
+  - id: static_title_0_5
+    category: static
+    reference_s: 0
+    target_s: 5
+    roi: [260, 20, 310, 65]
+    expected_fire: false
+    note: Monetary Policy 标题未变化，教师在区域外移动。
+  - id: static_title_5_10
+    category: static
+    reference_s: 5
+    target_s: 10
+    roi: [260, 20, 310, 65]
+    expected_fire: false
+    note: 标题不变；教师抬手位于该 ROI 之外。
+  - id: static_line_50_52
+    category: static
+    reference_s: 50
+    target_s: 52
+    roi: [260, 20, 1000, 45]
+    expected_fire: false
+    note: 第一行文字未变；选区下缘限定在原帧 y=64，排除 52 秒时进入画面的教师头顶。首轮 h=60 混入头部，不属于无遮挡样本。
+  - id: added_definition_47_50
+    category: added
+    reference_s: 47
+    target_s: 50
+    roi: [260, 20, 1000, 60]
+    expected_fire: true
+    note: 标题后新增 the branch of economic policy。
+  - id: added_words_52_54
+    category: added
+    reference_s: 52
+    target_s: 54
+    roi: [260, 20, 1000, 60]
+    expected_fire: true
+    note: 第一行末尾新增 which manipulates。
+  - id: scene_switch_440_450
+    category: scene_change
+    reference_s: 440
+    target_s: 450
+    roi: [250, 18, 1000, 160]
+    expected_fire: true
+    note: Monetary Policy 画面切到 Keynesian Economic Theory；不是连续拍摄的擦除动作。

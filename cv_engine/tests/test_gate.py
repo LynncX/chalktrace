@@ -64,6 +64,13 @@ class ChangeGateTests(unittest.TestCase):
         gate.commit(self.image, hidden, 0)
         self.assertEqual(self.decide(gate)["reason"], "visibility_recovery")
 
+    def test_erased_ink_is_a_change_even_without_new_dark_pixels(self):
+        gate = ChangeGate(self.config)
+        written = self.image.copy()
+        cv2.putText(written, "TEST", (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 5)
+        gate.commit(written, self.mask, 0)
+        self.assertEqual(self.decide(gate)["reason"], "changed")
+
     def test_people_union_is_board_coverage_and_does_not_double_count(self):
         calibration = {"output_size": [100, 100], "source_to_board": np.eye(3).tolist()}
         people = [{"bbox": [10, 10, 40, 40]}, {"bbox": [20, 10, 50, 40]}]

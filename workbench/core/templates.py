@@ -191,6 +191,7 @@ def _render_variants(ctx, spec: dict) -> str:
 
     parts = [
         c.metric_row([ctx.resolve_metric(m) for m in spec.get("metrics", [])]),
+        c.details("本次输入与口径", str(ctx.get("input", "")), open=True) if ctx.get("input") else "",
         c.variant_grid(samples, variants, cells, winner=winner),
     ]
 
