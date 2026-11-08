@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>板书拾记 · B 纸感学术 · UI 整合分享版</title>
+<!--
+  单文件整合版：把 base.css / mini-course.html / mini-note.html / web.html 合为一份。
+  零外部依赖（无字体、无图片、无脚本 CDN），双击即可离线打开，可直接作为附件分享。
+  三个界面按 .view-course / .view-note / .view-web 做 CSS 作用域隔离，视觉与原件一致。
+-->
+<style>
+/* ============================================================
+   1. 共享设计令牌与组件（原 base.css，原样内联）
+   ============================================================ */
+:root {
+  --paper: #F7F4EA;
+  --card: #FFFEF9;
+  --ink: #26251F;
+  --ink-2: #6F6A5B;
+  --ink-3: #9A9482;
+  --green: #285847;
+  --green-deep: #1E4636;
+  --green-soft: #E9F0E6;
+  --green-line: #CBDCC8;
+  --line: #E3DECE;
+  --board: #2A4A3A;
+  --chalk: #F1EFE2;
+  --wood: #A98B60;
+  --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --sans: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --math-font: "STIX Two Text", "Times New Roman", "Latin Modern Roman", Georgia, serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .serif { font-family: var(--serif); font-weight: 600; }
+
+/* ---------- 数学公式（手写排版，无外部依赖） ---------- */
+.math { font-family: var(--math-font); font-style: italic; white-space: nowrap; }
+.math .up { font-style: normal; }
+.frac { display: inline-flex; flex-direction: column; vertical-align: -0.45em; text-align: center; line-height: 1.2; margin: 0 .12em; }
+.frac .num { padding: 0 .25em; border-bottom: 1px solid currentColor; }
+.frac .den { padding: 0 .25em; }
+.bigop { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; vertical-align: middle; margin: 0 .18em; }
+.bigop .sym { font-size: 1.75em; font-style: normal; line-height: .95; }
+.bigop .hi, .bigop .lo { font-size: .58em; font-style: normal; line-height: 1.1; }
+.limop { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1; margin: 0 .1em; }
+.limop .word { font-style: normal; font-size: .92em; }
+.limop .under { font-size: .6em; font-style: normal; }
+sub, sup { font-size: .68em; font-style: normal; }
+
+/* ---------- 黑板 ---------- */
+.board {
+  position: relative;
+  background:
+    radial-gradient(130% 120% at 24% 12%, rgba(255,255,255,.055), transparent 55%),
+    radial-gradient(90% 110% at 82% 90%, rgba(0,0,0,.22), transparent 60%),
+    linear-gradient(155deg, #37594A, #27432F 62%, #1F3828);
+  color: var(--chalk);
+  border: 3px solid var(--wood);
+  outline: 1px solid rgba(0,0,0,.28);
+  box-shadow: inset 0 0 34px rgba(0,0,0,.36);
+  font-family: "Kaiti SC", "KaiTi", "STKaiti", var(--serif);
+}
+.board .chalk-math { font-family: var(--math-font); font-style: italic; }
+.board .frame-light { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.14); }
+
+/* ---------- 按钮 ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: .45em;
+  border: 1px solid var(--green); border-radius: 8px;
+  padding: .52em 1.15em; font-size: 13.5px; line-height: 1.4;
+  background: var(--card); color: var(--green);
+  cursor: pointer; user-select: none; white-space: nowrap;
+}
+.btn:hover { background: var(--green-soft); }
+.btn.primary { background: var(--green); color: #F6F3E6; }
+.btn.primary:hover { background: var(--green-deep); }
+.btn svg { width: 1.05em; height: 1.05em; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- 定义徽章 / 小节标题 ---------- */
+.pill {
+  display: inline-block; background: var(--green); color: #F6F3E6;
+  font-size: 12px; line-height: 1; padding: .32em .7em; border-radius: 5px;
+  margin-right: .6em; vertical-align: .08em;
+}
+.sec-bar { border-left: 3px solid var(--green); padding-left: .6em; }
+
+/* ---------- 状态栏（小程序屏） ---------- */
+.statusbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 20px 4px; font-size: 14px; font-weight: 600; color: var(--ink);
+}
+.statusbar .icons { display: inline-flex; align-items: center; gap: 5px; }
+.statusbar svg { display: block; }
+
+/* ---------- 小程序胶囊 ---------- */
+.capsule {
+  display: inline-flex; align-items: center;
+  border: 1px solid rgba(0,0,0,.14); border-radius: 999px;
+  background: rgba(255,255,255,.75); overflow: hidden;
+}
+.capsule span { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 26px; }
+.capsule span + span { border-left: 1px solid rgba(0,0,0,.14); }
+
+/* ---------- 底部标签栏（小程序屏） ---------- */
+.tabbar { display: flex; border-top: 1px solid var(--line); background: var(--card); }
+.tabbar .tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 7px 0 9px; font-size: 11px; color: var(--ink-2);
+}
+.tabbar .tab.active { color: var(--green); }
+.tabbar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ============================================================
+   2. 分享外壳（所有类名 sh- 前缀，与三个界面零冲突）
+   ============================================================ */
+.sh-shell { max-width: 1400px; margin: 0 auto; padding: 26px 24px 40px; }
+.sh-head {
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  padding: 20px 26px; margin-bottom: 14px;
+  display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap;
+}
+.sh-head .sh-kicker {
+  font-size: 11.5px; letter-spacing: .16em; color: var(--green);
+  border: 1px solid var(--green-line); background: var(--green-soft);
+  border-radius: 4px; padding: .18em .7em; margin-bottom: 8px; display: inline-block;
+}
+.sh-head h1 { font-size: 26px; color: var(--ink); letter-spacing: .03em; }
+.sh-head .sh-sub { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+.sh-head .sh-meta { margin-left: auto; font-size: 12px; color: var(--ink-3); text-align: right; line-height: 1.9; }
+
+.sh-bar {
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 14px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.sh-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.sh-nav button {
+  font-family: var(--sans); font-size: 13.5px; line-height: 1.4;
+  border: 1px solid var(--line); border-radius: 7px;
+  background: var(--card); color: var(--ink-2);
+  padding: .5em 1.05em; cursor: pointer; white-space: nowrap;
+}
+.sh-nav button:hover { border-color: var(--green-line); background: var(--green-soft); color: var(--green); }
+.sh-nav button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #F6F3E6; }
+.sh-bar .sh-hint { margin-left: auto; font-size: 12px; color: var(--ink-3); }
+
+.sh-stage { position: relative; width: 100%; overflow: hidden; }
+.sh-canvas {
+  display: flex; align-items: flex-start; gap: 28px;
+  width: max-content; transform-origin: top left;
+}
+.sh-item { display: block; }
+.sh-cap {
+  font-size: 12.5px; color: var(--ink-2); padding: 0 0 8px 2px;
+  font-family: var(--serif); letter-spacing: .02em;
+}
+.sh-cap b { color: var(--green); font-weight: 600; margin-right: .5em; }
+.sh-canvas:not([data-mode="all"]) .sh-cap { display: none; }
+.sh-canvas[data-mode="course"] .sh-item:not([data-view="course"]),
+.sh-canvas[data-mode="note"]   .sh-item:not([data-view="note"]),
+.sh-canvas[data-mode="web"]    .sh-item:not([data-view="web"]) { display: none; }
+
+.sh-foot { margin-top: 16px; font-size: 12px; color: var(--ink-3); line-height: 1.9; }
+.sh-foot code { font-family: var(--math-font); background: var(--green-soft); border-radius: 3px; padding: 0 .35em; color: var(--green); }
+.sh-toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 12px);
+  background: var(--ink); color: var(--paper); font-size: 13px;
+  padding: 9px 18px; border-radius: 999px; box-shadow: 0 6px 20px rgba(0,0,0,.2);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 99;
+}
+.sh-toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   3. 两个小程序页共享的屏幕组件（原文件相同部分合并）
+   ============================================================ */
+.phone {
+  width: 375px; height: 760px; background: var(--card);
+  border: 1px solid var(--line); border-radius: 30px;
+  box-shadow: 0 10px 34px rgba(60,52,30,.14);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.navbar {
+  display: flex; align-items: center; justify-content: center;
+  position: relative; padding: 10px 14px; border-bottom: 1px solid var(--line);
+}
+.navbar .title { font-family: var(--serif); font-size: 16.5px; color: var(--ink); }
+.navbar .capsule { position: absolute; right: 14px; }
+.capsule svg { width: 15px; height: 15px; fill: var(--ink-2); stroke: none; }
+.capsule .dot { border-radius: 50%; width: 15px; height: 15px; border: 1.5px solid var(--ink-2); position: relative; }
+.capsule .dot::after { content: ""; position: absolute; inset: 3.5px; border-radius: 50%; background: var(--ink-2); }
+.page { flex: 1; overflow: hidden; }
+.tabbar .tab[data-go], [data-go], [data-toast] { cursor: pointer; }
+
+/* ============================================================
+   4. 小程序 · 课程页（原 mini-course.html 专属样式）
+   ============================================================ */
+.view-course .page { padding: 20px 18px 0; display: flex; flex-direction: column; }
+.view-course .page-title { font-family: var(--serif); font-size: 27px; margin-bottom: 4px; }
+.view-course .underline { width: 34px; height: 3px; background: var(--green); border-radius: 1px; margin-bottom: 16px; }
+.view-course .upload-btn {
+  display: flex; align-items: center; justify-content: center; gap: .5em;
+  background: var(--green); color: #F6F3E6; border-radius: 9px;
+  padding: 12px; font-size: 15px; margin-bottom: 22px; cursor: pointer;
+}
+.view-course .upload-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.view-course .course-card {
+  display: flex; align-items: center; gap: 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: #FFFDF6;
+  padding: 12px; cursor: pointer;
+}
+.view-course .course-card:hover { border-color: var(--green-line); background: var(--green-soft); }
+.view-course .cover {
+  width: 86px; height: 64px; flex: none; border-radius: 6px; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 12px; line-height: 1.5; text-align: center;
+}
+.view-course .cover .m { margin-top: 3px; font-size: 13px; }
+.view-course .cc-body { flex: 1; min-width: 0; }
+.view-course .cc-body h3 { font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+.view-course .cc-body .meta { font-size: 12px; color: var(--ink-2); }
+.view-course .cc-chev { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--ink-3); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ============================================================
+   5. 小程序 · 笔记页（原 mini-note.html 专属样式）
+   ============================================================ */
+.view-note .navbar .back {
+  position: absolute; left: 14px; width: 18px; height: 18px;
+  fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.view-note .page { padding: 14px 18px 0; }
+.view-note .page-title { font-family: var(--serif); font-size: 24px; margin-bottom: 8px; }
+.view-note .crumbs {
+  display: flex; align-items: center; font-size: 13px; color: var(--ink-2);
+  padding-bottom: 9px; border-bottom: 1px solid var(--line); margin-bottom: 12px;
+}
+.view-note .crumbs svg { width: 14px; height: 14px; fill: none; stroke: var(--ink-3); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; margin-left: auto; }
+.view-note h3.sec { font-size: 18px; margin-bottom: 8px; }
+.view-note .note-p { font-size: 13.5px; text-align: justify; }
+.view-note .formula-center { text-align: center; font-size: 15px; margin: 8px 0; }
+.view-note .defline { font-size: 13.5px; text-align: justify; margin-bottom: 7px; }
+.view-note .formula-card {
+  background: var(--green-soft); border: 1px solid var(--green-line); border-radius: 6px;
+  padding: 9px; text-align: center; font-size: 14px;
+}
+.view-note .origin { margin-top: 13px; }
+.view-note .origin h3 { font-size: 15px; margin-bottom: 8px; }
+.view-note .origin h3 small { font-family: var(--sans); font-weight: 400; color: var(--ink-3); font-size: 12px; }
+.view-note .origin .board { height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12.5px; line-height: 1.8; padding: 0 14px; text-align: center; }
+.view-note .origin-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.view-note .play-chip {
+  display: inline-flex; align-items: center; gap: .45em;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+  padding: 7px 14px; font-size: 12.5px; color: var(--ink); cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.view-note .play-chip svg { width: 12px; height: 12px; fill: var(--green); stroke: none; }
+.view-note .origin-foot .spacer { flex: 1; }
+.view-note .export-btn {
+  display: inline-flex; align-items: center; gap: .45em;
+  background: var(--green); color: #F6F3E6; border-radius: 9px;
+  padding: 7px 15px; font-size: 13px; cursor: pointer;
+}
+.view-note .export-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ============================================================
+   6. Web 结果页（原 web.html 专属样式，全部限定在 .view-web 内）
+   ============================================================ */
+.view-web { width: 1240px; }
+.view-web .app {
+  width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 2px 18px rgba(60,52,30,.07); overflow: hidden;
+}
+.view-web .topbar {
+  display: flex; align-items: center; gap: 34px;
+  padding: 18px 34px 14px; border-bottom: 1px solid var(--line);
+}
+.view-web .brand { display: flex; align-items: baseline; gap: 12px; }
+.view-web .brand h1 { font-size: 25px; color: var(--green); letter-spacing: .04em; }
+.view-web .brand small { color: var(--ink-2); font-size: 12.5px; letter-spacing: .12em; }
+.view-web .nav { display: flex; gap: 30px; margin-left: 12px; }
+.view-web .nav a { color: var(--ink-2); text-decoration: none; font-size: 15px; padding: 4px 2px; position: relative; }
+.view-web .nav a.active { color: var(--ink); font-weight: 600; }
+.view-web .nav a.active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -6px;
+  height: 2px; background: var(--green); border-radius: 1px;
+}
+.view-web .topbar .spacer { flex: 1; }
+.view-web .btn.newtask { border-radius: 8px; }
+
+.view-web .main { display: grid; grid-template-columns: 208px minmax(0,1fr) 316px; }
+.view-web .side { border-right: 1px solid var(--line); padding: 22px 0 24px; }
+.view-web .side .course-name {
+  font-family: var(--serif); font-size: 17px; color: var(--ink);
+  padding: 0 22px 14px; border-bottom: 1px solid var(--line); margin-bottom: 14px;
+}
+.view-web .side .label { font-size: 12.5px; color: var(--ink-3); padding: 0 22px 8px; letter-spacing: .08em; }
+.view-web .side ol { list-style: none; }
+.view-web .side ol a { display: block; padding: 8.5px 22px; color: var(--ink-2); text-decoration: none; font-size: 14px; }
+.view-web .side ol a:hover { background: var(--paper); color: var(--ink); }
+.view-web .side ol a.active { background: var(--green-soft); color: var(--green); font-weight: 600; box-shadow: inset 3px 0 0 var(--green); }
+
+.view-web .stage { padding: 24px 30px 28px; min-width: 0; }
+.view-web .stage-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.view-web .stage-head h2 { font-size: 21px; }
+.view-web .badge-demo {
+  font-size: 11.5px; color: var(--green); background: var(--green-soft);
+  border: 1px solid var(--green-line); border-radius: 4px; padding: .22em .6em;
+}
+.view-web .player { border-radius: 6px; overflow: hidden; box-shadow: 0 3px 14px rgba(40,50,35,.16); }
+.view-web .board.screen { padding: 30px 44px 26px; }
+.view-web .board.screen .line { text-align: center; font-size: 19px; line-height: 2.1; letter-spacing: .03em; }
+.view-web .board.screen .title { font-size: 24px; margin-bottom: 10px; letter-spacing: .08em; }
+.view-web .board.screen .math { font-size: 1.05em; }
+.view-web .defbox {
+  border: 1.5px dashed rgba(241,239,226,.75); border-radius: 4px;
+  padding: 12px 26px; margin: 10px auto 4px; max-width: 640px;
+}
+.view-web .playerbar {
+  display: flex; align-items: center; gap: 14px;
+  background: #1C241F; color: #D8D5C6; padding: 10px 16px; font-size: 12.5px;
+}
+.view-web .playerbar svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; cursor: pointer; }
+.view-web .pbar { flex: 1; position: relative; height: 4px; background: rgba(216,213,198,.28); border-radius: 2px; }
+.view-web .pbar .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 14%; background: var(--green); border-radius: 2px; }
+.view-web .pbar .knob {
+  position: absolute; left: 14%; top: 50%; transform: translate(-50%, -50%);
+  width: 12px; height: 12px; border-radius: 50%; background: #EDEAE0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+.view-web .tcurrent { color: #EDEAE0; }
+.view-web .ttotal { color: #8E948B; }
+
+.view-web .evidence { margin-top: 24px; }
+.view-web .evidence h3 { font-size: 15.5px; margin-bottom: 12px; }
+.view-web .evidence h3 small { font-family: var(--sans); font-weight: 400; color: var(--ink-3); font-size: 12px; margin-left: 8px; }
+.view-web .ev-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.view-web .ev-card { cursor: pointer; }
+.view-web .ev-card .board { height: 74px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.view-web .ev-card .ts { margin-top: 6px; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.view-web .ev-card.selected .board { outline: 2px solid var(--green); outline-offset: 2px; }
+.view-web .ev-card.selected .ts { color: var(--green); font-weight: 600; }
+.view-web .ev-card:hover .board { outline: 2px solid var(--green-line); outline-offset: 2px; }
+.view-web .ev-card.selected:hover .board { outline-color: var(--green); }
+
+.view-web .notes { border-left: 1px solid var(--line); padding: 24px 26px 28px; display: flex; flex-direction: column; gap: 16px; }
+.view-web .notes .actions { display: flex; gap: 10px; }
+.view-web .notes .actions .btn { flex: 1; justify-content: center; }
+.view-web .note-head { font-size: 13px; color: var(--ink-2); border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.view-web .note-head b { color: var(--ink); font-weight: 600; }
+.view-web .note-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 18px 20px; }
+.view-web .note-card h3 { font-size: 17px; margin-bottom: 10px; }
+.view-web .note-card p { font-size: 13.8px; color: var(--ink); text-align: justify; }
+.view-web .note-card .formula-center { text-align: center; font-size: 17px; margin: 12px 0; }
+.view-web .defline { margin: 10px 0; font-size: 13.8px; text-align: justify; }
+.view-web .formula-card {
+  background: var(--green-soft); border: 1px solid var(--green-line); border-radius: 6px;
+  padding: 12px; text-align: center; font-size: 16px; margin-top: 10px;
+}
+.view-web .origin-link {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line); border-radius: 8px; padding: 11px 14px;
+  color: var(--ink); text-decoration: none; font-size: 13.5px; background: var(--card);
+}
+.view-web .origin-link:hover { border-color: var(--green-line); background: var(--green-soft); }
+.view-web .origin-link svg { width: 16px; height: 16px; fill: none; stroke: var(--green); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.view-web .origin-link .chev { margin-left: auto; stroke: var(--ink-3); }
+/* 原 web.html 的 @media(max-width:1080px) 两栏降级改由外层统一缩放处理，保证任何屏宽下三栏布局不失真 */
+
+/* ============================================================
+   7. 打印 / 导出 PDF（隐藏外壳，三个界面顺次排布）
+   ============================================================ */
+@media print {
+  @page { size: A4 landscape; margin: 8mm; }
+  .sh-head, .sh-bar, .sh-foot, .sh-toast { display: none !important; }
+  .sh-shell { max-width: none; padding: 0; }
+  .sh-stage { overflow: visible !important; height: auto !important; }
+  .sh-canvas { display: block !important; transform: none !important; width: auto !important; }
+  .sh-item { display: block !important; margin: 0 0 10mm; }
+  .sh-cap { display: block !important; }
+  .view-web { width: 100% !important; }
+  .phone, .view-web .app, .view-web .player { box-shadow: none !important; }
+  .view-web .stage, .view-web .notes { padding: 16px 18px; }
+  .view-web .board.screen { padding: 20px 18px; }
+  .view-web .board.screen .line { font-size: 15px; line-height: 1.9; }
+  .view-web .board.screen .title { font-size: 19px; }
+  .view-web .defbox { padding: 10px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sh-shell">
+
+  <header class="sh-head">
+    <div>
+      <span class="sh-kicker">UI CONCEPT · B</span>
+      <h1>板书拾记 · 纸感学术</h1>
+      <div class="sh-sub">Web 结果页 / 小程序课程页 / 小程序笔记页 —— 三套界面，一份文件</div>
+    </div>
+    <div class="sh-meta">
+      纯静态视觉演示，数据均为演示内容<br>
+      零外部依赖 · 双击即可离线打开
+    </div>
+  </header>
+
+  <div class="sh-bar">
+    <nav class="sh-nav" aria-label="界面切换">
+      <button type="button" data-view="all">全部预览</button>
+      <button type="button" data-view="course">小程序 · 课程</button>
+      <button type="button" data-view="note">小程序 · 笔记</button>
+      <button type="button" data-view="web">Web 结果页</button>
+    </nav>
+    <span class="sh-hint">点界面内的「课程 / 笔记 / 查看原始板书」可联动跳转 · ← → 切换 · Esc 回总览</span>
+  </div>
+
+  <div class="sh-stage" id="shStage">
+    <div class="sh-canvas" id="shCanvas" data-mode="all">
+
+      <!-- ============ ① 小程序 · 课程页 ============ -->
+      <figure class="sh-item" data-view="course">
+        <figcaption class="sh-cap"><b>01</b>小程序 · 课程页</figcaption>
+        <div class="view view-course">
+          <div class="phone">
+            <div class="statusbar">
+              <span>10:24</span>
+              <span class="icons">
+                <svg width="17" height="11" viewBox="0 0 17 11"><g fill="#26251F"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="2.5" width="3" height="8.5" rx="0.8"/><rect x="13.5" y="0" width="3" height="11" rx="0.8"/></g></svg>
+                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 9.5l3.4-3.9a5.2 5.2 0 00-6.8 0zM12.3 4a7.6 7.6 0 00-9.6 0L1.2 2.3a9.9 9.9 0 0112.6 0z" fill="#26251F"/></svg>
+                <svg width="23" height="11" viewBox="0 0 23 11"><rect x="0.5" y="0.5" width="19" height="10" rx="2.5" fill="none" stroke="#26251F" stroke-opacity="0.4"/><rect x="2" y="2" width="14" height="7" rx="1.2" fill="#26251F"/><rect x="21" y="3.5" width="1.6" height="4" rx="0.8" fill="#26251F" fill-opacity="0.4"/></svg>
+              </span>
+            </div>
+
+            <div class="navbar">
+              <span class="title">板书拾记</span>
+              <span class="capsule"><span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></span><span><span class="dot"></span></span></span>
+            </div>
+
+            <div class="page">
+              <div class="page-title">课程</div>
+              <div class="underline"></div>
+
+              <div class="upload-btn" data-toast="演示界面 · 上传视频暂未接入后端">
+                <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
+                上传视频
+              </div>
+
+              <div class="course-card" data-go="note" title="查看该课程的笔记">
+                <div class="board cover">
+                  <span class="frame-light"></span>
+                  <span>高等数学</span>
+                  <span class="chalk-math m">∫<sub>a</sub><sup>b</sup> f(x) dx</span>
+                </div>
+                <div class="cc-body">
+                  <h3>高等数学 · 定积分</h3>
+                  <div class="meta">8 条笔记</div>
+                </div>
+                <svg class="cc-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+              </div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab active" data-go="course">
+                <svg viewBox="0 0 24 24"><path d="M12 5.5C10.2 4 7.8 3.5 4.5 3.5v14c3.3 0 5.7.5 7.5 2 1.8-1.5 4.2-2 7.5-2v-14c-3.3 0-5.7.5-7.5 2z"/><path d="M12 5.5v14"/></svg>
+                课程
+              </div>
+              <div class="tab" data-go="note">
+                <svg viewBox="0 0 24 24"><path d="M6 3.5h9.5L19 7v13.5H6z"/><path d="M15 3.5V7h3.5M9 11.5h6M9 15h6"/></svg>
+                笔记
+              </div>
+              <div class="tab" data-toast="「我的」页面暂未包含在本次方向稿中">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.2 3.9-5 7-5s5.8 1.8 7 5"/></svg>
+                我的
+              </div>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- ============ ② 小程序 · 笔记页 ============ -->
+      <figure class="sh-item" data-view="note">
+        <figcaption class="sh-cap"><b>02</b>小程序 · 笔记页</figcaption>
+        <div class="view view-note">
+          <div class="phone">
+            <div class="statusbar">
+              <span>10:24</span>
+              <span class="icons">
+                <svg width="17" height="11" viewBox="0 0 17 11"><g fill="#26251F"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="2.5" width="3" height="8.5" rx="0.8"/><rect x="13.5" y="0" width="3" height="11" rx="0.8"/></g></svg>
+                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 9.5l3.4-3.9a5.2 5.2 0 00-6.8 0zM12.3 4a7.6 7.6 0 00-9.6 0L1.2 2.3a9.9 9.9 0 0112.6 0z" fill="#26251F"/></svg>
+                <svg width="23" height="11" viewBox="0 0 23 11"><rect x="0.5" y="0.5" width="19" height="10" rx="2.5" fill="none" stroke="#26251F" stroke-opacity="0.4"/><rect x="2" y="2" width="14" height="7" rx="1.2" fill="#26251F"/><rect x="21" y="3.5" width="1.6" height="4" rx="0.8" fill="#26251F" fill-opacity="0.4"/></svg>
+              </span>
+            </div>
+
+            <div class="navbar">
+              <svg class="back" viewBox="0 0 24 24" data-go="course"><path d="M15 5l-7 7 7 7"/></svg>
+              <span class="title">板书拾记</span>
+              <span class="capsule"><span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></span><span><span class="dot"></span></span></span>
+            </div>
+
+            <div class="page">
+              <div class="page-title">笔记</div>
+              <div class="crumbs">
+                <span>高等数学 · 定积分</span>
+                <svg viewBox="0 0 24 24" data-go="course"><path d="M9 6l6 6-6 6"/></svg>
+              </div>
+
+              <h3 class="sec sec-bar">定积分的定义</h3>
+              <p class="note-p">设 <span class="math">f(x)</span> 在 <span class="math">[a,b]</span> 上连续，将 <span class="math">[a,b]</span> 等分为 <span class="math">n</span> 份，<span class="math">Δx = <span class="frac"><span class="num">b − a</span><span class="den">n</span></span></span>，取 <span class="math">ξ<sub>i</sub> ∈ [x<sub>i−1</sub>, x<sub>i</sub>]</span>，构造和式</p>
+              <div class="formula-center math"><i>S</i><sub>n</sub> = <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx .</div>
+              <p class="defline"><span class="pill">定义</span>若极限 <span class="math"><span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <i>S</i><sub>n</sub></span> 存在，则称该极限为 <span class="math">f(x)</span> 在 <span class="math">[a,b]</span> 上的定积分，记为</p>
+              <div class="formula-card math"><span class="bigop"><span class="hi">b</span><span class="sym">∫</span><span class="lo">a</span></span> f(x) dx = <span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx .</div>
+
+              <div class="origin">
+                <h3 class="sec-bar">原始板书<small>（证据）</small></h3>
+                <div class="board">
+                  <span class="frame-light"></span>
+                  <span>定义&ensp;若极限 <span class="chalk-math"><span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <i>S</i><sub>n</sub></span> 存在，则称该极限为</span>
+                  <span><span class="chalk-math">f(x)</span> 在 <span class="chalk-math">[a,b]</span> 上的定积分，记为</span>
+                  <span class="chalk-math"><span class="bigop"><span class="hi">b</span><span class="sym">∫</span><span class="lo">a</span></span> f(x) dx = <span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx .</span>
+                </div>
+                <div class="origin-foot">
+                  <span class="play-chip" data-toast="演示界面 · 视频回看暂未接入后端">
+                    <svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg>
+                    06:24
+                  </span>
+                  <span class="spacer"></span>
+                  <span class="export-btn" data-toast="演示界面 · 导出 PDF 暂未接入后端">
+                    <svg viewBox="0 0 24 24"><path d="M12 4v12m0 0l5-5m-5 5l-5-5M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
+                    导出 PDF
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab" data-go="course">
+                <svg viewBox="0 0 24 24"><path d="M12 5.5C10.2 4 7.8 3.5 4.5 3.5v14c3.3 0 5.7.5 7.5 2 1.8-1.5 4.2-2 7.5-2v-14c-3.3 0-5.7.5-7.5 2z"/><path d="M12 5.5v14"/></svg>
+                课程
+              </div>
+              <div class="tab active" data-go="note">
+                <svg viewBox="0 0 24 24"><path d="M6 3.5h9.5L19 7v13.5H6z"/><path d="M15 3.5V7h3.5M9 11.5h6M9 15h6"/></svg>
+                笔记
+              </div>
+              <div class="tab" data-toast="「我的」页面暂未包含在本次方向稿中">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.2 3.9-5 7-5s5.8 1.8 7 5"/></svg>
+                我的
+              </div>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- ============ ③ Web 结果页 ============ -->
+      <figure class="sh-item" data-view="web">
+        <figcaption class="sh-cap"><b>03</b>Web 结果页</figcaption>
+        <div class="view view-web">
+          <div class="app">
+            <header class="topbar">
+              <div class="brand">
+                <h1>板书拾记</h1>
+                <small>课堂板书数字化</small>
+              </div>
+              <nav class="nav">
+                <a class="active" href="#" data-toast="当前已在本页">课程</a>
+                <a href="#" data-go="note">笔记</a>
+              </nav>
+              <div class="spacer"></div>
+              <button class="btn primary newtask" type="button" data-toast="演示界面 · 新建任务暂未接入后端">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                新建任务
+              </button>
+            </header>
+
+            <div class="main">
+              <aside class="side">
+                <div class="course-name">高等数学 · 定积分</div>
+                <div class="label">课程目录</div>
+                <ol>
+                  <li><a class="active" href="#" data-toast="当前章节：1. 定积分的定义">1. 定积分的定义</a></li>
+                  <li><a href="#" data-toast="演示界面 · 其余章节暂无内容">2. 定积分的性质</a></li>
+                  <li><a href="#" data-toast="演示界面 · 其余章节暂无内容">3. 微积分基本定理</a></li>
+                  <li><a href="#" data-toast="演示界面 · 其余章节暂无内容">4. 定积分的计算</a></li>
+                  <li><a href="#" data-toast="演示界面 · 其余章节暂无内容">5. 定积分的应用</a></li>
+                </ol>
+              </aside>
+
+              <section class="stage">
+                <div class="stage-head">
+                  <h2>高等数学 · 定积分</h2>
+                  <span class="badge-demo">演示数据</span>
+                </div>
+
+                <figure class="player">
+                  <div class="board screen">
+                    <div class="frame-light"></div>
+                    <div class="line title"><span class="chalk-math">§ 5.1</span>&nbsp;&nbsp;定积分的定义</div>
+                    <div class="line">设 <span class="chalk-math">f(x)</span> 在 <span class="chalk-math">[a,b]</span> 上连续，将 <span class="chalk-math">[a,b]</span> 等分为 <span class="chalk-math">n</span> 份，</div>
+                    <div class="line"><span class="chalk-math">Δx = <span class="frac"><span class="num">b − a</span><span class="den">n</span></span></span>，取 <span class="chalk-math">ξ<sub>i</sub> ∈ [x<sub>i−1</sub>, x<sub>i</sub>]</span>，构造和式</div>
+                    <div class="line"><span class="chalk-math"><i>S</i><sub>n</sub> = <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx</span></div>
+                    <div class="defbox">
+                      <div class="line" style="font-size:17px">定义&emsp;若极限 <span class="chalk-math"><span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <i>S</i><sub>n</sub></span> 存在，则称该极限为</div>
+                      <div class="line" style="font-size:17px"><span class="chalk-math">f(x)</span> 在 <span class="chalk-math">[a,b]</span> 上的定积分，记为</div>
+                      <div class="line" style="font-size:19px;margin-top:2px"><span class="chalk-math"><span class="bigop"><span class="hi">b</span><span class="sym">∫</span><span class="lo">a</span></span> f(x) dx = <span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx</span></div>
+                    </div>
+                  </div>
+                  <figcaption class="playerbar">
+                    <svg viewBox="0 0 24 24" data-toast="演示界面 · 播放器暂未接入真实视频"><path d="M8 5.5v13l10-6.5z" fill="currentColor" stroke="none"/></svg>
+                    <span class="tcurrent">06:24</span><span style="color:#8E948B">/</span><span class="ttotal">45:20</span>
+                    <div class="pbar"><div class="fill"></div><div class="knob"></div></div>
+                    <svg viewBox="0 0 24 24" data-toast="演示界面 · 播放器暂未接入真实视频"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" stroke="none"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>
+                    <svg viewBox="0 0 24 24" data-toast="演示界面 · 播放器暂未接入真实视频"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+                  </figcaption>
+                </figure>
+
+                <div class="evidence">
+                  <h3>板书证据<small>本节关键板书片段</small></h3>
+                  <div class="ev-row" id="evRow">
+                    <div class="ev-card selected" data-sec="0">
+                      <div class="board"><span>§5.1&ensp;定积分的定义</span><span class="frame-light"></span></div>
+                      <div class="ts">00:00</div>
+                    </div>
+                    <div class="ev-card" data-sec="137">
+                      <div class="board"><span class="chalk-math">Δx = <span class="frac"><span class="num">b − a</span><span class="den">n</span></span></span><span class="frame-light"></span></div>
+                      <div class="ts">02:17</div>
+                    </div>
+                    <div class="ev-card" data-sec="243">
+                      <div class="board"><span class="chalk-math"><i>S</i><sub>n</sub> = <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>)Δx</span><span class="frame-light"></span></div>
+                      <div class="ts">04:03</div>
+                    </div>
+                    <div class="ev-card" data-sec="384">
+                      <div class="board"><span class="chalk-math"><span class="bigop"><span class="hi">b</span><span class="sym">∫</span><span class="lo">a</span></span> f(x)dx = <span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>)Δx</span><span class="frame-light"></span></div>
+                      <div class="ts">06:24</div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="notes">
+                <div class="actions">
+                  <button class="btn" type="button" data-toast="演示界面 · 上传视频暂未接入后端">
+                    <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
+                    上传视频
+                  </button>
+                  <button class="btn primary" type="button" data-toast="演示界面 · 导出笔记暂未接入后端">
+                    <svg viewBox="0 0 24 24"><path d="M12 4v12m0 0l5-5m-5 5l-5-5M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2"/></svg>
+                    导出笔记
+                  </button>
+                </div>
+
+                <div class="note-head">笔记 · <b>定积分的定义</b></div>
+
+                <div class="note-card">
+                  <h3 class="sec-bar">定积分的定义</h3>
+                  <p>设 <span class="math">f(x)</span> 在 <span class="math">[a,b]</span> 上连续，将 <span class="math">[a,b]</span> 等分为 <span class="math">n</span> 份，<span class="math">Δx = <span class="frac"><span class="num">b − a</span><span class="den">n</span></span></span>，取 <span class="math">ξ<sub>i</sub> ∈ [x<sub>i−1</sub>, x<sub>i</sub>]</span>，构造和式</p>
+                  <div class="formula-center math"><i>S</i><sub>n</sub> = <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx .</div>
+                  <p class="defline"><span class="pill">定义</span>若极限 <span class="math"><span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <i>S</i><sub>n</sub></span> 存在，则称该极限为 <span class="math">f(x)</span> 在 <span class="math">[a,b]</span> 上的定积分，记为</p>
+                  <div class="formula-card math"><span class="bigop"><span class="hi">b</span><span class="sym">∫</span><span class="lo">a</span></span> f(x) dx = <span class="limop"><span class="word">lim</span><span class="under">n→∞</span></span> <span class="bigop"><span class="hi">n</span><span class="sym">∑</span><span class="lo">i=1</span></span> f(ξ<sub>i</sub>) Δx .</div>
+                </div>
+
+                <a class="origin-link" href="#" data-go="note" title="跳到小程序笔记页查看原始板书证据">
+                  <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="13" rx="1.5"/><path d="M3.5 15l4.5-4 3.5 3 4-4.5 5 5.5"/></svg>
+                  查看原始板书
+                  <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+                </a>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+    </div>
+  </div>
+
+  <footer class="sh-foot">
+    B「纸感学术」方向稿复刻整合 · 三页共用一套设计令牌，公式为手写 CSS 排版、黑板画面纯 CSS 绘制；Web 页板书证据缩略图可点击切换时间点。<br>
+    可用地址后缀直接分享某一页：<code>#course</code> / <code>#note</code> / <code>#web</code> / <code>#all</code>；浏览器打印（建议横向 A4）可导出含三页的 PDF。
+  </footer>
+</div>
+
+<div class="sh-toast" id="shToast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var VIEWS = ['all', 'course', 'note', 'web'];
+  var canvas = document.getElementById('shCanvas');
+  var stage  = document.getElementById('shStage');
+  var toast  = document.getElementById('shToast');
+  var navBtns = Array.prototype.slice.call(document.querySelectorAll('.sh-nav button'));
+  var toastTimer = null;
+
+  /* 画布按可用宽度整体等比缩放；transform 不改变 offsetWidth，可安全测量原始尺寸 */
+  function fit() {
+    canvas.style.transform = 'none';
+    stage.style.height = '';
+    var naturalW = canvas.offsetWidth;
+    var naturalH = canvas.offsetHeight;
+    var avail = stage.clientWidth;
+    if (!naturalW || !avail) return;
+    var scale = Math.min(1, avail / naturalW);
+    canvas.style.transform = 'scale(' + scale + ')';
+    stage.style.height = Math.ceil(naturalH * scale) + 'px';
+  }
+
+  function readHash() {
+    var v = location.hash.replace(/^#/, '');
+    return VIEWS.indexOf(v) > -1 ? v : 'all';
+  }
+
+  function applyView(v) {
+    canvas.dataset.mode = v;
+    navBtns.forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.view === v));
+    });
+    fit();
+  }
+
+  function setView(v) {
+    if (VIEWS.indexOf(v) < 0) return;
+    if (readHash() === v) { applyView(v); return; }
+    location.hash = v; /* hashchange 里统一 applyView */
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('on'); }, 2000);
+  }
+
+  /* Web 证据卡：点击切换选中态并同步播放器时间/进度（演示数据，总时长 45:20） */
+  var TOTAL = 2720;
+  function selectEvidence(card) {
+    document.querySelectorAll('#evRow .ev-card').forEach(function (c) { c.classList.remove('selected'); });
+    card.classList.add('selected');
+    var ts = card.querySelector('.ts').textContent.trim();
+    var pct = Math.min(100, Math.max(0, Number(card.dataset.sec) / TOTAL * 100));
+    var cur = document.querySelector('.view-web .tcurrent');
+    var fill = document.querySelector('.view-web .pbar .fill');
+    var knob = document.querySelector('.view-web .pbar .knob');
+    if (cur) cur.textContent = ts;
+    if (fill) fill.style.width = pct + '%';
+    if (knob) knob.style.left = pct + '%';
+  }
+
+  document.addEventListener('click', function (e) {
+    var nav = e.target.closest('.sh-nav button');
+    if (nav) { setView(nav.dataset.view); return; }
+
+    var evCard = e.target.closest('.ev-card');
+    if (evCard) { selectEvidence(evCard); return; }
+
+    var go = e.target.closest('[data-go]');
+    if (go) { e.preventDefault(); setView(go.dataset.go); return; }
+
+    var tip = e.target.closest('[data-toast]');
+    if (tip) { e.preventDefault(); showToast(tip.dataset.toast); return; }
+
+    var deadLink = e.target.closest('a[href="#"]');
+    if (deadLink) e.preventDefault();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { setView('all'); return; }
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var order = ['course', 'note', 'web'];
+    var i = order.indexOf(readHash());
+    var next = e.key === 'ArrowRight'
+      ? (i < 0 ? 0 : (i + 1) % order.length)
+      : (i < 0 ? order.length - 1 : (i - 1 + order.length) % order.length);
+    setView(order[next]);
+  });
+
+  window.addEventListener('hashchange', function () { applyView(readHash()); });
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', function () { requestAnimationFrame(fit); });
+
+  applyView(readHash());
+  requestAnimationFrame(fit);
+})();
+</script>
+
+</body>
+</html>

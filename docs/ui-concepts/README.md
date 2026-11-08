@@ -9,6 +9,7 @@
 ## 复刻实现
 
 - [B 纸感学术](./B/)：已按原图复刻为静态页面（零依赖、双击可看）——[web.html](./B/web.html) Web 结果页、[mini-course.html](./B/mini-course.html) 小程序课程页、[mini-note.html](./B/mini-note.html) 小程序笔记页；共享设计令牌与公式/黑板组件在 [B/base.css](./B/base.css)。公式为手写 CSS 排版，黑板画面纯 CSS 绘制，数据为写死的演示内容。
+- [B 整合分享版](./B/share-all-in-one.html)：把上面 4 个文件内联为**单个自包含 HTML**，可直接作为附件发送。内置「全部预览 / 课程 / 笔记 / Web」切换、自动等比缩放、界面间联动跳转（课程→笔记→原始板书）、板书证据点击跳时间点；支持 `#course` / `#note` / `#web` / `#all` 后缀定位，浏览器打印可导出含三页的 PDF。视觉与三个原页面一致，仍为零外部依赖。
 
 ## 生成提示词
 
