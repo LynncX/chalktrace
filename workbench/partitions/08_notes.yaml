@@ -9,4 +9,4 @@ figures:
   - {path: 08_notes/notes.md, caption: 结构化笔记（内联正文）}
   - {glob: "media/08_notes/*", caption: "原文对照 · {stem}", limit: 12}
 folds:
-  - {title: 生成方式, body: "最小流水线按采样时间串联 OCR 原文并导出 Markdown / TXT；未进行跨帧去重、条目归并、错误修正或 PDF 导出。具体运行范围见 manifest 中的阶段说明和 warnings。"}
+  - {title: 生成方式, body: "按首次观察排列去重条目，导出 Markdown / TXT，并绑定最佳观察时间、原帧、裁剪与识别历史；08_notes/raw.md 保留逐帧原文。未自动纠错或导出 PDF。具体运行范围见 manifest 中的阶段说明和 warnings。"}

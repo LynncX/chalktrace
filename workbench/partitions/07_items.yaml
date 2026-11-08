@@ -6,4 +6,4 @@ figures:
   - {glob: "media/07_items/box_*.png", caption: "条目 bbox · {stem}", limit: 18}
   - {glob: "media/07_items/lifecycle_*.png", caption: "生命周期 · {stem}", limit: 12}
 folds:
-  - {title: 条目归并规则, body: "同一文本在连续快照中重复出现时合并为一条，记录 first_seen / last_seen / best_ocr_call；默认视图只展示条目与原帧，帧号与 bbox 在放大后可见。"}
+  - {title: 条目归并规则, body: "固定标定下按同行位置重叠与文本相似度一对一匹配；最多容许缺失 2 次 OCR 且间隔不超过 120 秒。置信度距最高值 0.10 内优先保留较完整原文。首末时间仅为观察时间；不判定擦除。全部版本见 07_items/history。"}

@@ -2,7 +2,6 @@
 from contextlib import contextmanager
 from pathlib import Path
 import resource
-import re
 import time
 
 import cv2
@@ -16,6 +15,8 @@ from .stages.s02_board import locate_board
 from .stages.s03_pose import pose_overlay, project_people
 from .stages.s04_gate import ChangeGate, gate_overlay
 from .stages.s05_enhance import enhance_board
+from .stages.s07_items import merge_items, bind_evidence
+from .stages.s08_notes import write_notes
 
 
 def read_image(path):
@@ -53,7 +54,7 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine,
 
     with writer:
         writer.write_config(config.to_dict())
-        writer.warn("未实现跨帧条目跟踪；笔记仅为实际 OCR 调用的逐帧原文。")
+        writer.warn("条目跟踪假定固定机位与固定标定；行拆分/合并、擦除重写和切镜头尚未专门处理，需核验识别历史。")
         if config.gate_mode == "fixed":
             writer.warn("固定采样基线：未执行人体遮挡估计与变化门控。")
         elif config.gate_mode == "change":
@@ -206,28 +207,15 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine,
                                     note="参考仅在 OCR 成功后更新；时间单位秒；人体遮挡优先于冷却与最长刷新间隔")
                 timings.append(dict(stage="04", seconds=gate_elapsed, frames=len(records), note=config.gate_mode))
 
+        with stage("07"):
+            tracks = merge_items(all_boxes, calls)
+            items = bind_evidence(tracks, writer)
+            writer.finish_stage("07", metrics=dict(items=len(items), observations=len(all_boxes),
+                                merged=sum(len(t["observations"])-1 for t in tracks)),
+                                note="固定标定下行级位置+文本匹配；首末时间为实际观察；不推断擦除")
+
         with stage("08"):
-            recognized = [row for row in records if "texts" in row]
-            lines = ["# 逐帧 OCR 原文", "", "未跨帧去重，未校正识别错误；不代表最终课堂笔记。", ""]
-            if not recognized:
-                lines.append("本次没有执行 OCR：请查看门控记录，不能据此认为视频没有板书。")
-            for row in recognized:
-                lines.extend([f"## {row['ts']:.2f}s · frame {row['frame']}", ""])
-                # 使用代码围栏，避免 OCR 原文被 Markdown 解释为标题或链接。
-                text = "\n".join(row["texts"]) or "（未识别出文字）"
-                fence = "`" * max(3, max((len(part) for part in re.findall(r'`+', text)), default=0) + 1)
-                lines.extend([fence, text, fence, ""])
-            notes = "\n".join(lines)
-            writer.write_text("08_notes/notes.md", notes)
-            transcript = "\n\n".join(
-                f"[{row['ts']:.2f}s]\n" + "\n".join(row["texts"]) for row in recognized)
-            writer.write_text("08_notes/notes.txt", (transcript or
-                              "本次没有执行 OCR：请查看门控记录，不能据此认为视频没有板书。") + "\n")
-            writer.set_outputs({"notes_md": "08_notes/notes.md", "notes_txt": "08_notes/notes.txt",
-                                "ocr_boxes": "06_ocr/boxes.json"})
-            writer.finish_stage("08", metrics={"sections": len(recognized),
-                                "chars": sum(len(t) for row in recognized for t in row["texts"])},
-                                note="逐帧原文；未去重或生成 PDF")
+            write_notes(items, calls, writer)
 
         with stage("09"):
             writer.write_json("09_stats/summary.json", timings)

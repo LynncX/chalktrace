@@ -51,9 +51,15 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(manifest["status"], "done")
         self.assertEqual(manifest["stages"]["06"]["metrics"]["calls"], 3)
         self.assertEqual(len(created), 1)
-        for no in ("03", "04", "07"):
+        for no in ("03", "04"):
             self.assertEqual(manifest["stages"][no]["status"], "pending")
-        self.assertEqual(manifest["items"], [])
+        self.assertEqual(len(manifest["items"]), 1)
+        self.assertEqual(manifest["stages"]["07"]["status"], "done")
+        self.assertEqual(manifest["items"][0]["first_seen_sec"], .2)
+        self.assertEqual(manifest["items"][0]["last_seen_sec"], 1.2)
+        history = json.loads((writer.root / manifest["items"][0]["evidence"]["history"]).read_text())
+        self.assertEqual(len(history["observations"]), 3)
+        self.assertEqual((writer.root / "08_notes/notes.txt").read_text().count("原文"), 1)
         boxes = json.loads((writer.root / "06_ocr/boxes.json").read_text())
         self.assertEqual([box["frame"] for box in boxes], [2, 7, 12])
         self.assertEqual([box["ts"] for box in boxes], [.2, .7, 1.2])

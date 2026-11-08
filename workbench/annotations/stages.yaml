@@ -56,20 +56,20 @@
   note: 单次运行复用模型；poly 是校正板书坐标，source_poly 是原帧坐标，叠加图展示原帧上的框。
 
 "07":
-  draft: true
+  draft: false
   files: [cv_engine/stages/s07_items.py]
   funcs:
     - {name: merge_items(), note: 连续快照去重，记录首见/末见}
     - {name: bind_evidence(), note: 绑定原帧、裁剪与 OCR 原文}
-  params: {DEDUP_WINDOW_S: 待定}
+  params: {text_similarity: 0.72, axis_overlap: 0.5, max_missing_calls: 2, max_gap_s: 120, confidence_slack: 0.10}
 
 "08":
   draft: false
   files: [cv_engine/pipeline.py]
   funcs:
-    - {name: run(), note: 按采样时间串联原文，输出 Markdown / TXT}
+    - {name: run(), note: 按首见时间排列去重条目，保留原文与证据}
   params: {}
-  note: 最小原文汇总，不做条目跟踪、跨帧去重或 PDF 导出。
+  note: 保留最佳原文及全部识别历史；不做自动纠错或 PDF 导出。
 
 "09":
   draft: false

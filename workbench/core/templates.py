@@ -142,6 +142,15 @@ def _render_items(ctx, spec: dict) -> str:
             ocr_link=it.get("ocr_link", ""),
             status=it.get("status", "done"),
         ))
+        history_path = (it.get("evidence") or {}).get("history")
+        if history_path:
+            history = ctx.read_json(history_path)
+            if isinstance(history, dict):
+                best = history.get("best") or {}
+                cards[-1] = '<div>' + cards[-1] + c.details(
+                    f"{it.get('item_id', '')} 识别历史 · 最佳 {best.get('ts', '—')}s",
+                    c.table(history.get("observations", []),
+                            ["ts", "frame", "ocr_call", "text", "score", "match_similarity"])) + '</div>'
     parts = [c.card("条目证据", c.card_grid(cards), badge=f"{len(cards)} 条")] if cards else []
     parts.append(c.gallery(_figures(ctx, spec.get("figures", []), spec["no"]),
                            cols=spec.get("cols")))

@@ -133,6 +133,7 @@ button { font: inherit; }
 .wb-vcell { min-width: 0; }
 .wb-vcell .wb-figure img, .wb-vcell .wb-missing-box { aspect-ratio: 16 / 10; }
 .wb-vcell .wb-figure img { object-fit: contain; }
+.wb-evidence-media .wb-figure img { object-fit: contain; background: var(--surface); }
 .wb-vcell .wb-figure figcaption { font-size: 11px; }
 .wb-vcell.is-winner .wb-figure img { outline: 1px solid var(--accent); outline-offset: 2px; }
 
