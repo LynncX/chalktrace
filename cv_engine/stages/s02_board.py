@@ -3,6 +3,31 @@ import cv2
 import numpy as np
 
 
+def calibration_overlay(image, points):
+    """只修改核验图：保留 ROI 内像素，压暗区域外，描绘真实边界及四角。"""
+    overlay = image.copy()
+    polygon = np.rint(points).astype("int32")
+    mask = np.zeros(image.shape[:2], dtype="uint8")
+    cv2.fillConvexPoly(mask, polygon, 255)
+    overlay[mask == 0] = (image[mask == 0] * .25).astype("uint8")
+    # 双层描边，即使边界贴着画面边缘或底色为白板也能辨认。
+    thickness = max(4, round(min(image.shape[:2]) / 140))
+    cv2.polylines(overlay, [polygon], True, (20, 20, 20), thickness + 5, cv2.LINE_AA)
+    cv2.polylines(overlay, [polygon], True, (0, 220, 255), thickness, cv2.LINE_AA)
+    for index, (x, y) in enumerate(polygon):
+        cv2.circle(overlay, (int(x), int(y)), thickness + 5, (20, 20, 20), -1, cv2.LINE_AA)
+        cv2.circle(overlay, (int(x), int(y)), thickness + 2, (80, 80, 255), -1, cv2.LINE_AA)
+        text = f"{index + 1} ({points[index, 0]:g}, {points[index, 1]:g})"
+        scale = max(.45, min(image.shape[:2]) / 1200)
+        (tw, th), baseline = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, 2)
+        tx = max(4, min(int(x) + 14, image.shape[1] - tw - 5))
+        ty = max(th + 4, min(int(y) + th + 16, image.shape[0] - baseline - 5))
+        cv2.rectangle(overlay, (tx-3, ty-th-3), (tx+tw+3, ty+baseline+3), (20, 20, 20), -1)
+        cv2.putText(overlay, text, (tx, ty), cv2.FONT_HERSHEY_SIMPLEX, scale,
+                    (255, 255, 255), 2, cv2.LINE_AA)
+    return overlay
+
+
 def locate_board(image, config):
     height, width = image.shape[:2]
     if config.corners is not None:
@@ -33,7 +58,6 @@ def locate_board(image, config):
     target = np.float32([[0, 0], [out_w-1, 0], [out_w-1, out_h-1], [0, out_h-1]])
     matrix = cv2.getPerspectiveTransform(points, target)
     board = cv2.warpPerspective(image, matrix, (out_w, out_h))
-    overlay = image.copy()
-    cv2.polylines(overlay, [points.astype("int32")], True, (0, 200, 255), 2)
+    overlay = calibration_overlay(image, points)
     return board, overlay, dict(mode=mode, corners=points.tolist(),
                                source_to_board=matrix.tolist(), output_size=[out_w, out_h])

@@ -63,8 +63,10 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine)
                 board, overlay, meta = locate_board(read_image(writer.root / row["path"]), config)
                 row.update(board=f"media/02_board/board_{key}.png", calibration=meta)
                 writer.save_image(row["board"], board)
-                writer.save_image(f"media/02_board/calib_{key}.png", overlay)
-                board_rows.append(dict(frame=row["frame"], ts=row["ts"], path=row["board"], **meta))
+                overlay_path = f"media/02_board/calib_{key}.png"
+                writer.save_image(overlay_path, overlay)
+                board_rows.append(dict(frame=row["frame"], ts=row["ts"], path=row["board"],
+                                       source_path=row["path"], overlay_path=overlay_path, **meta))
             writer.write_json("02_board/calibration.json", board_rows)
             mode = board_rows[0]["mode"]
             writer.finish_stage("02", metrics={"located": len(records) if mode != "full_frame" else 0,

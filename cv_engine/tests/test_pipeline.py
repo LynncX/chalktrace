@@ -62,6 +62,14 @@ class PipelineTests(unittest.TestCase):
             self.assertTrue((writer.root / entry["path"]).is_file(), entry)
         html = build(str(writer.root), assets_mode="inline")
         self.assertTrue(html["path"].is_file())
+        page = html["path"].read_text()
+        self.assertIn("白板区域核验", page)
+        self.assertIn("人工矩形 ROI", page)
+        self.assertIn("原图标定 · 边界与四角", page)
+        self.assertIn("裁剪结果", page)
+        calibration = json.loads((writer.root / "02_board/calibration.json").read_text())
+        self.assertTrue((writer.root / calibration[0]["overlay_path"]).is_file())
+        self.assertTrue((writer.root / calibration[0]["source_path"]).is_file())
         self.assertIn("原文", (writer.root / "08_notes/notes.txt").read_text())
 
     def test_model_failure_marks_run_and_stage(self):
@@ -110,6 +118,16 @@ class PipelineTests(unittest.TestCase):
                        PipelineConfig(corners=[[0, 0], [0, 50], [50, 50], [50, 0]])):
             with self.assertRaises(ValueError):
                 locate_board(image, config)
+
+    def test_overlay_masks_outside_without_changing_ocr_input(self):
+        image = np.full((400, 600, 3), 200, dtype=np.uint8)
+        before = image.copy()
+        board, overlay, _ = locate_board(image, PipelineConfig(roi=[0, 30, 600, 320]))
+        np.testing.assert_array_equal(image, before)
+        np.testing.assert_array_equal(board, before[30:350])
+        np.testing.assert_array_equal(overlay[150, 150], before[150, 150])
+        self.assertLess(int(overlay[0, 300, 0]), int(image[0, 300, 0]))
+        self.assertGreater(int(overlay[150, 0, 2]), 200)  # 贴左边缘的边线仍清晰可见
 
     def test_rejects_invalid_config_and_existing_output(self):
         for config in (PipelineConfig(sample_interval_s=0), PipelineConfig(start_s=float("nan")),

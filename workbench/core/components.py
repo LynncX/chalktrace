@@ -53,6 +53,11 @@ def card_grid(cells: list[str], *, cols: int | None = None) -> str:
     return f'<div class="wb-grid"{style}>' + "".join(cells) + "</div>"
 
 
+def board_pair(figures: list[str]) -> str:
+    """核验图完整显示，避免常规缩略图 cover 裁掉贴边的标定线。"""
+    return '<div class="wb-grid wb-board-pair">' + "".join(figures) + "</div>"
+
+
 # --- 指标 ---
 def metric_row(metrics: list[Metric]) -> str:
     if not metrics:

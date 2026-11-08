@@ -13,6 +13,8 @@
 
 字段名与路径名硬编码在 `workbench/partitions/*.yaml`，改名需同步改 YAML。可照抄的样例：`workbench/fixtures/demo_mock/manifest.json`。manifest 其余字段页面不消费，可自由扩展。
 
+区域核验页使用 `partitions/02_board.py` 处理逐帧配对，读取 `02_board/calibration.json` 的 `mode`、`frame`、`ts`、`corners`、`output_size` 与显式 `overlay_path` / `path`，分别展示原图标定和输出图。图像完整适配，避免缩略图裁掉贴边边界；缺少元数据或路径显示缺失，不反推旧文件名。人工标定和全帧直通单独计数，不把它们称为自动定位成功或给出虚构置信度。
+
 ## manifest.json
 
 | 字段 | 内容 |
