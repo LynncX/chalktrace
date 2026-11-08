@@ -9,9 +9,12 @@ import cv2
 import numpy as np
 
 from .adapters.ocr import OcrEngine
+from .adapters.pose import PoseEngine
 from .config import PipelineConfig
 from .stages.s01_frames import blur_score, extract_frames
 from .stages.s02_board import locate_board
+from .stages.s03_pose import pose_overlay, project_people
+from .stages.s04_gate import ChangeGate, gate_overlay
 from .stages.s05_enhance import enhance_board
 
 
@@ -22,13 +25,14 @@ def read_image(path):
     return image
 
 
-def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine):
+def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine, pose_factory=PoseEngine):
     """writer 由调用方提供；engine_factory 便于无模型验证编排与坐标回溯。"""
     config.validate()
     video_path = Path(video_path)
     started = time.perf_counter()
     timings = []
     records = []
+    gate_elapsed = 0.0
 
     @contextmanager
     def stage(no):
@@ -41,7 +45,7 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine)
             writer.fail_stage(no, str(exc))
             raise
         else:
-            seconds = time.perf_counter() - start
+            seconds = time.perf_counter() - start - (gate_elapsed if no == "06" else 0)
             writer.finish_stage(no, duration_s=seconds)
             timings.append(dict(stage=no, seconds=seconds, frames=len(records),
                                 note=writer.manifest.stage(no).note))
@@ -49,7 +53,11 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine)
 
     with writer:
         writer.write_config(config.to_dict())
-        writer.warn("最小闭环：未执行教师姿态、变化门控与跨帧条目跟踪；笔记仅为逐帧 OCR 原文。")
+        writer.warn("未实现跨帧条目跟踪；笔记仅为实际 OCR 调用的逐帧原文。")
+        if config.gate_mode == "fixed":
+            writer.warn("固定采样基线：未执行人体遮挡估计与变化门控。")
+        elif config.gate_mode == "change":
+            writer.warn("仅变化门控：未屏蔽人体运动，变化可能来自教师而非板书。")
         with stage("01"):
             sampled, records = extract_frames(video_path, config, writer)
             writer.finish_stage("01", metrics={"sampled": len(sampled),
@@ -74,6 +82,27 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine)
             if mode == "full_frame":
                 writer.warn("未提供 ROI/四角标定，02 使用全帧直通；不代表自动定位成功。")
 
+        if config.gate_mode == "occlusion_change":
+            with stage("03"):
+                pose_engine = pose_factory(config)
+                pose_rows = []
+                for row in records:
+                    source = read_image(writer.root / row["path"])
+                    people = pose_engine.detect(source)
+                    mask, occlusion = project_people(people, row["calibration"])
+                    row.update(occlusion=occlusion, mask_path=f"03_pose/masks/{row['frame']:08d}.png")
+                    writer.save_image(row["mask_path"], mask)
+                    path = f"media/03_pose/pose_{row['frame']:08d}.jpg"
+                    writer.save_image(path, pose_overlay(source, people, occlusion))
+                    pose_rows.append(dict(frame=row["frame"], ts=row["ts"], people=people, people_count=len(people),
+                                          occlusion=occlusion, mask_path=row["mask_path"], path=path))
+                    print(f"[03] {row['ts']:.2f}s 人体 {len(people)}，覆盖估计 {occlusion:.1%}", flush=True)
+                writer.write_json("03_pose/poses.json", pose_rows)
+                writer.finish_stage("03", metrics={"pose_frames": len(records),
+                                    "occluded": sum(r["occlusion"] > config.occlusion_max for r in pose_rows)},
+                                    note="YOLOv8n-pose ONNX；全部人体框投影并集/板书面积，不是 IoU 或精确分割")
+                writer.warn("人体框覆盖率仅为保守遮挡估计；无人体检测结果不等于确认无遮挡。未估计教师身份、朝向或行为。")
+
         with stage("05"):
             clarity = []
             for row in records:
@@ -88,16 +117,52 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine)
                                 "clarity": sum(clarity) / len(clarity)}, note=config.enhance)
 
         with stage("06"):
-            load_start = time.perf_counter()
-            engine = engine_factory(config)
-            load_s = time.perf_counter() - load_start
+            engine, load_s = None, 0.0
             calls, all_boxes, scores = [], [], []
-            for call, row in enumerate(records, 1):
+            gate_rows = []
+            gated = config.gate_mode != "fixed"
+            gate = ChangeGate(config) if gated else None
+            if gated:
+                writer.begin_stage("04")
+            for row in records:
                 key = f"{row['frame']:08d}"
+                board = read_image(writer.root / row["board"])
+                mask = (cv2.imread(str(writer.root / row["mask_path"]), cv2.IMREAD_GRAYSCALE)
+                        if "mask_path" in row else np.zeros(board.shape[:2], dtype="uint8"))
+                if mask is None:
+                    raise RuntimeError("无法读取遮挡掩码")
+                if gated:
+                    gate_start = time.perf_counter()
+                    try:
+                        info = gate.decide(board, mask, ts=row["ts"], occlusion=row.get("occlusion", 0.0))
+                        info.update(frame=row["frame"], ts=row["ts"], clarity=blur_score(board))
+                        audit_path = f"media/04_gate/decision_{key}.jpg"
+                        writer.save_image(audit_path, gate_overlay(board, info))
+                        info["audit_path"] = audit_path
+                        gate_rows.append(info)
+                        writer.write_json("04_gate/gate.json", gate_rows)
+                        writer.log(dict(event="gate", **info))
+                    except Exception as exc:
+                        writer.fail_stage("04", str(exc))
+                        raise
+                    finally:
+                        gate_elapsed += time.perf_counter() - gate_start
+                    row["gate"] = info
+                    if not info["fired"]:
+                        print(f"[04] {row['ts']:.2f}s SKIP {info['reason']}", flush=True)
+                        continue
+                if engine is None:
+                    load_start = time.perf_counter()
+                    engine = engine_factory(config)
+                    load_s = time.perf_counter() - load_start
+                call = len(calls) + 1
                 start = time.perf_counter()
                 boxes = engine.recognize(read_image(writer.root / row["enhanced"]),
                                          frame=row["frame"], ts=row["ts"], call=call)
                 elapsed = time.perf_counter() - start
+                if gated:
+                    gate.commit(board, mask, row["ts"])
+                    writer.save_image(f"media/04_gate/fired_{key}.jpg", board)
                 source = read_image(writer.root / row["path"])
                 overlay = source.copy()
                 inverse = np.linalg.inv(np.asarray(row["calibration"]["source_to_board"]))
@@ -129,12 +194,24 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine)
                               "inference_s": sum(c["elapsed_s"] for c in calls)})
             writer.finish_stage("06", metrics={"calls": len(calls), "boxes": len(all_boxes),
                                 "score": sum(scores) / len(scores) if scores else None})
+            # 即使全部被遮挡拒绝，也输出空结果而不初始化 OCR 模型。
+            writer.write_json("06_ocr/calls.json", calls)
+            writer.write_json("06_ocr/boxes.json", all_boxes)
             if not all_boxes:
                 writer.warn("OCR 没有识别出文字；请检查区域标定、图像质量及模型设置。")
+            if gated:
+                writer.finish_stage("04", metrics={"candidates": len(records), "passed": len(calls),
+                                    "pass_rate": 100 * len(calls) / len(records),
+                                    "skipped": len(records) - len(calls)}, duration_s=gate_elapsed,
+                                    note="参考仅在 OCR 成功后更新；时间单位秒；人体遮挡优先于冷却与最长刷新间隔")
+                timings.append(dict(stage="04", seconds=gate_elapsed, frames=len(records), note=config.gate_mode))
 
         with stage("08"):
+            recognized = [row for row in records if "texts" in row]
             lines = ["# 逐帧 OCR 原文", "", "未跨帧去重，未校正识别错误；不代表最终课堂笔记。", ""]
-            for row in records:
+            if not recognized:
+                lines.append("本次没有执行 OCR：请查看门控记录，不能据此认为视频没有板书。")
+            for row in recognized:
                 lines.extend([f"## {row['ts']:.2f}s · frame {row['frame']}", ""])
                 # 使用代码围栏，避免 OCR 原文被 Markdown 解释为标题或链接。
                 text = "\n".join(row["texts"]) or "（未识别出文字）"
@@ -142,12 +219,14 @@ def run(video_path, config: PipelineConfig, writer, *, engine_factory=OcrEngine)
                 lines.extend([fence, text, fence, ""])
             notes = "\n".join(lines)
             writer.write_text("08_notes/notes.md", notes)
-            writer.write_text("08_notes/notes.txt", "\n\n".join(
-                f"[{row['ts']:.2f}s]\n" + "\n".join(row["texts"]) for row in records) + "\n")
+            transcript = "\n\n".join(
+                f"[{row['ts']:.2f}s]\n" + "\n".join(row["texts"]) for row in recognized)
+            writer.write_text("08_notes/notes.txt", (transcript or
+                              "本次没有执行 OCR：请查看门控记录，不能据此认为视频没有板书。") + "\n")
             writer.set_outputs({"notes_md": "08_notes/notes.md", "notes_txt": "08_notes/notes.txt",
                                 "ocr_boxes": "06_ocr/boxes.json"})
-            writer.finish_stage("08", metrics={"sections": len(records),
-                                "chars": sum(len(t) for row in records for t in row["texts"])},
+            writer.finish_stage("08", metrics={"sections": len(recognized),
+                                "chars": sum(len(t) for row in recognized for t in row["texts"])},
                                 note="逐帧原文；未去重或生成 PDF")
 
         with stage("09"):

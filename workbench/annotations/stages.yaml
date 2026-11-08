@@ -22,21 +22,22 @@
   note: 自动定位尚未实现；无标定时不计为定位成功。核验页逐帧配对原图标定和输出，区域外压暗，边界和四角编号仅绘制在核验图，不影响 OCR 输入。标定矩阵支持 OCR 框映射回原帧。
 
 "03":
-  draft: true
-  files: [cv_engine/stages/s03_pose.py]
+  draft: false
+  files: [cv_engine/adapters/pose.py, cv_engine/stages/s03_pose.py]
   funcs:
-    - {name: detect_pose(), note: YOLOv8n-pose}
-    - {name: occlusion_iou(), note: 人体框与白板 ROI 交并比}
-  params: {OCCLUSION_IOU: 0.30}
+    - {name: PoseEngine.detect(), note: YOLOv8n-pose ONNX / OpenCV DNN CPU}
+    - {name: project_people(), note: 人体框投影并集 / 板书区域面积}
+  params: {pose_conf: 0.25, occlusion_max: 0.30}
+  note: 仅 occlusion_change 模式启用。是保守覆盖估计，不是精确分割或教师身份/行为识别。模型缓存到项目 .cache/pose 并验证 SHA256。
 
 "04":
-  draft: true
+  draft: false
   files: [cv_engine/stages/s04_gate.py]
   funcs:
-    - {name: partition_gate(), note: 分区门控 + 短时可见板书保留}
-    - {name: ssim_delta(), note: 变化检测}
-  params: {SSIM_MAX: 0.88, COOLDOWN_FRAMES: 30, CLARITY_MIN: 0.45, OCCLUSION_SKIP: 0.30}
-  note: 阈值取自开题方案，待实测校准。
+    - {name: ChangeGate.decide(), note: 遮挡、冷却、共同可见区域变化与显露判断}
+    - {name: ChangeGate.commit(), note: 仅在 OCR 成功后更新参考}
+  params: {ssim_min: 0.985, change_ratio_min: 0.002, cooldown_s: 2, max_gap_s: 30}
+  note: 全板门控初版，尚未实现分区/条目级门控。冷却单位为秒；人体掩码窗口不参与 SSIM。参数仅为探索性默认值，待实测校准。
 
 "05":
   draft: false

@@ -1,0 +1,15 @@
+# 探索性验证素材，不是独立测试集；各阈值尚未经过标注集校准。
+start_s: 140
+end_s: 166
+sample_interval_s: 5
+max_frames: 6
+roi: [0, 18, 1280, 620]
+enhance: clahe
+gate_mode: occlusion_change
+occlusion_max: 0.30
+ssim_min: 0.985
+change_ratio_min: 0.002
+visibility_gain_min: 0.02
+common_visible_min: 0.20
+cooldown_s: 2
+max_gap_s: 30

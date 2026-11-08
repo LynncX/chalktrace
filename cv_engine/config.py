@@ -17,9 +17,21 @@ class PipelineConfig:
     rec_model: str = "PP-OCRv5_server_rec"
     score_min: float = 0.0  # 保留低置信度原文供核验
     cpu_threads: int = 4
+    gate_mode: str = "fixed"  # fixed / change / occlusion_change
+    occlusion_max: float = 0.30  # 人体框投影并集 / 校正板书面积；不是 IoU
+    pose_conf: float = 0.25
+    ssim_min: float = 0.985
+    diff_threshold: float = 20.0  # 灰度差（0..255）
+    change_ratio_min: float = 0.002
+    visibility_gain_min: float = 0.02
+    common_visible_min: float = 0.20
+    cooldown_s: float = 2.0
+    max_gap_s: float = 30.0
 
     def validate(self):
-        for name in ("start_s", "sample_interval_s", "blur_min", "score_min"):
+        for name in ("start_s", "sample_interval_s", "blur_min", "score_min", "occlusion_max",
+                     "pose_conf", "ssim_min", "diff_threshold", "change_ratio_min",
+                     "visibility_gain_min", "common_visible_min", "cooldown_s", "max_gap_s"):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
                 raise ValueError(f"{name} 必须是有限数值")
@@ -33,6 +45,14 @@ class PipelineConfig:
                 raise ValueError(f"{name} 必须是正整数")
         if not 0 <= self.score_min <= 1 or self.enhance not in ("clahe", "none"):
             raise ValueError("score_min 须在 [0, 1]，enhance 须为 clahe 或 none")
+        if self.gate_mode not in ("fixed", "change", "occlusion_change"):
+            raise ValueError("gate_mode 须为 fixed / change / occlusion_change")
+        for name in ("occlusion_max", "pose_conf", "ssim_min", "change_ratio_min",
+                     "visibility_gain_min", "common_visible_min"):
+            if not 0 < getattr(self, name) <= 1:
+                raise ValueError(f"{name} 须在 (0,1]")
+        if not 0 < self.diff_threshold <= 255 or self.cooldown_s < 0 or self.max_gap_s <= self.cooldown_s:
+            raise ValueError("diff_threshold 须在 (0,255]；max_gap_s 须大于非负 cooldown_s")
         if self.roi is not None and self.corners is not None:
             raise ValueError("roi 与 corners 只能选择一个")
         for name in ("det_model", "rec_model"):

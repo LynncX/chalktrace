@@ -90,6 +90,10 @@ button { font: inherit; }
   background: var(--surface-2); border-radius: 10px; cursor: zoom-in;
 }
 .wb-figure video { cursor: default; }
+.wb-panel[data-panel="03"] .wb-figure img,
+.wb-panel[data-panel="04"] .wb-figure img {
+  aspect-ratio: 16 / 10; object-fit: contain;
+}
 .wb-board-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .wb-board-pair .wb-figure img, .wb-board-pair .wb-missing-box {
   aspect-ratio: 16 / 10; object-fit: contain; background: var(--surface);
@@ -128,6 +132,7 @@ button { font: inherit; }
 .wb-vrow-label small { display: block; font-family: var(--font); color: var(--faint); font-size: 11px; }
 .wb-vcell { min-width: 0; }
 .wb-vcell .wb-figure img, .wb-vcell .wb-missing-box { aspect-ratio: 16 / 10; }
+.wb-vcell .wb-figure img { object-fit: contain; }
 .wb-vcell .wb-figure figcaption { font-size: 11px; }
 .wb-vcell.is-winner .wb-figure img { outline: 1px solid var(--accent); outline-offset: 2px; }
 

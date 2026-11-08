@@ -18,6 +18,7 @@ def main(argv=None):
     parser.add_argument("--max-frames", type=int)
     parser.add_argument("--roi", type=int, nargs=4, metavar=("X", "Y", "W", "H"))
     parser.add_argument("--enhance", choices=["clahe", "none"])
+    parser.add_argument("--gate-mode", choices=["fixed", "change", "occlusion_change"])
     args = parser.parse_args(argv)
     try:
         data = {}
@@ -26,7 +27,7 @@ def main(argv=None):
             data = yaml.safe_load(args.config.read_text(encoding="utf-8"))
             if not isinstance(data, dict):
                 raise ValueError("配置文件须为 YAML 对象")
-        for key in ("start_s", "end_s", "sample_interval_s", "max_frames", "roi", "enhance"):
+        for key in ("start_s", "end_s", "sample_interval_s", "max_frames", "roi", "enhance", "gate_mode"):
             value = getattr(args, key)
             if value is not None:
                 data[key] = value

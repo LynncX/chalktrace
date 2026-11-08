@@ -118,9 +118,9 @@ class AnnotationTests(unittest.TestCase):
         self.assertIn('class="wb-details wb-impl"', html)
         self.assertNotIn("<details class=\"wb-details wb-impl\" open", html)  # 默认折叠
         self.assertIn("s04_gate.py", html)
-        self.assertIn("partition_gate()", html)
-        self.assertIn("SSIM_MAX", html)
-        self.assertIn("待校准", html)
+        self.assertIn("ChangeGate.decide()", html)
+        self.assertIn("ssim_min", html)
+        self.assertIn("待实测校准", html)
         self.assertIn('wb-impl-label">备注', html)
         escaped = c.impl_note(["a<b.py"], [("f()", "x&y")], [("K", "<0.88")])
         self.assertIn("&lt;", escaped)
