@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "id": "whiteboard_pilot",
+  "title": "英文板书 · 首批试标",
+  "created_at": "2026-11-09T06:52:53.768746+00:00",
+  "segments": [
+    {
+      "start": 140,
+      "end": 170,
+      "interval": 5
+    }
+  ],
+  "sampling": "fixed_before_quality_filter",
+  "video": {
+    "path": "data/videos/test_video.mp4",
+    "sha256": "38c68f3dde84eeedf281cdbe8f0ac373f8b2d59566935581f3278b71a92b6939",
+    "fps": 30.0,
+    "frames": 33528,
+    "width": 1280,
+    "height": 720
+  },
+  "frames": [
+    {
+      "id": "F00004200",
+      "number": 4200,
+      "time": 140.0,
+      "requested_time": 140,
+      "origin": "regular",
+      "scene_id": "S01"
+    },
+    {
+      "id": "F00004350",
+      "number": 4350,
+      "time": 145.0,
+      "requested_time": 145,
+      "origin": "regular",
+      "scene_id": "S01"
+    },
+    {
+      "id": "F00004500",
+      "number": 4500,
+      "time": 150.0,
+      "requested_time": 150,
+      "origin": "regular",
+      "scene_id": "S01"
+    },
+    {
+      "id": "F00004650",
+      "number": 4650,
+      "time": 155.0,
+      "requested_time": 155,
+      "origin": "regular",
+      "scene_id": "S01"
+    },
+    {
+      "id": "F00004800",
+      "number": 4800,
+      "time": 160.0,
+      "requested_time": 160,
+      "origin": "regular",
+      "scene_id": "S01"
+    },
+    {
+      "id": "F00004950",
+      "number": 4950,
+      "time": 165.0,
+      "requested_time": 165,
+      "origin": "regular",
+      "scene_id": "S01"
+    }
+  ]
+}

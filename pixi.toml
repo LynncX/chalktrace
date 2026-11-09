@@ -15,6 +15,7 @@ XDG_CACHE_HOME = "$PIXI_PROJECT_ROOT/.cache"
 [tasks]
 ocr-smoke = "python scripts/smoke_ocr.py"
 cv = "python -m cv_engine"
+annotate = "python -m annotation_workbench"
 
 [dependencies]
 python = "3.12.*"

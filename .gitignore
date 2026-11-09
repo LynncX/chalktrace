@@ -59,6 +59,9 @@ data/consent/*
 Thumbs.db
 .idea/
 .cache/
+
+# 标注自动备份；正式 annotations.json 与帧集配置进入版本库
+evaluation/annotations/*/*.previous.json
 .paddlex/
 
 # --- 本地工具状态：不参与版本库 ---

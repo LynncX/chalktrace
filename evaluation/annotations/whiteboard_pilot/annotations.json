@@ -1,0 +1,341 @@
+{
+  "schema_version": 1,
+  "dataset_id": "whiteboard_pilot",
+  "video_sha256": "38c68f3dde84eeedf281cdbe8f0ac373f8b2d59566935581f3278b71a92b6939",
+  "revision": 26,
+  "scenes": {
+    "S01": {
+      "name": "S01",
+      "board": [
+        [
+          0,
+          0
+        ],
+        [
+          1280,
+          0
+        ],
+        [
+          1280,
+          720
+        ],
+        [
+          0,
+          720
+        ]
+      ]
+    }
+  },
+  "tracks": {
+    "S01-L001": {
+      "scene_id": "S01",
+      "versions": {
+        "V001": "Monetary Policy: the branch of"
+      }
+    },
+    "S01-L002": {
+      "scene_id": "S01",
+      "versions": {
+        "V001": "ic policy which manipulates"
+      }
+    },
+    "S01-L003": {
+      "scene_id": "S01",
+      "versions": {
+        "V001": "the money supply in a society"
+      }
+    },
+    "S01-L004": {
+      "scene_id": "S01",
+      "versions": {
+        "V001": "e the aggregate market"
+      }
+    },
+    "S01-L005": {
+      "scene_id": "S01",
+      "versions": {
+        "V001": "and Manage the economy."
+      }
+    }
+  },
+  "frames": {
+    "F00004200": {
+      "scene_id": "S01",
+      "reference_id": null,
+      "status": "todo",
+      "quality": "clear",
+      "ocr_decision": "uncertain",
+      "events": [],
+      "reviewed": false,
+      "occluders": [],
+      "observations": [
+        {
+          "id": "Oa73791a3b38c497c",
+          "track_id": "S01-L001",
+          "version_id": "V001",
+          "visible_text": "Monetary Policy: the branch of ic policy which manipulates",
+          "regions": [
+            [
+              [
+                275,
+                26
+              ],
+              [
+                752,
+                26
+              ],
+              [
+                752,
+                68
+              ],
+              [
+                275,
+                68
+              ]
+            ],
+            [
+              [
+                818,
+                29
+              ],
+              [
+                1195,
+                23
+              ],
+              [
+                1195,
+                58
+              ],
+              [
+                818,
+                64
+              ]
+            ]
+          ],
+          "visibility": "partial",
+          "change": "uncertain",
+          "confirmed": false,
+          "source": {
+            "id": "ocr-0",
+            "text": "Monetary Policy: the branch of",
+            "regions": [
+              [
+                [
+                  275,
+                  26
+                ],
+                [
+                  752,
+                  26
+                ],
+                [
+                  752,
+                  68
+                ],
+                [
+                  275,
+                  68
+                ]
+              ]
+            ],
+            "score": 0.9110322594642639,
+            "source": "PP-OCRv5/original-frame",
+            "frame": 4200
+          }
+        },
+        {
+          "id": "O32dd5b107d604a9b",
+          "track_id": "S01-L003",
+          "version_id": "V001",
+          "visible_text": "the money supply in a society e the aggregate market",
+          "regions": [
+            [
+              [
+                317,
+                78
+              ],
+              [
+                727,
+                72
+              ],
+              [
+                727,
+                106
+              ],
+              [
+                317,
+                112
+              ]
+            ],
+            [
+              [
+                859,
+                70
+              ],
+              [
+                1168,
+                65
+              ],
+              [
+                1168,
+                97
+              ],
+              [
+                859,
+                101
+              ]
+            ]
+          ],
+          "visibility": "full",
+          "change": "unchanged",
+          "confirmed": false,
+          "source": {
+            "id": "ocr-2",
+            "text": "the money supply in a society",
+            "regions": [
+              [
+                [
+                  317,
+                  78
+                ],
+                [
+                  727,
+                  72
+                ],
+                [
+                  727,
+                  106
+                ],
+                [
+                  317,
+                  112
+                ]
+              ]
+            ],
+            "score": 0.9496349096298218,
+            "source": "PP-OCRv5/original-frame",
+            "frame": 4200
+          }
+        },
+        {
+          "id": "O8e0088d3ca1e4bdc",
+          "track_id": "S01-L005",
+          "version_id": "V001",
+          "visible_text": "and Manage the economy.",
+          "regions": [
+            [
+              [
+                318,
+                117
+              ],
+              [
+                631,
+                111
+              ],
+              [
+                631,
+                146
+              ],
+              [
+                318,
+                152
+              ]
+            ]
+          ],
+          "visibility": "full",
+          "change": "unchanged",
+          "confirmed": false,
+          "source": {
+            "id": "ocr-4",
+            "text": "and Manage the economy.",
+            "regions": [
+              [
+                [
+                  318,
+                  117
+                ],
+                [
+                  631,
+                  111
+                ],
+                [
+                  631,
+                  146
+                ],
+                [
+                  318,
+                  152
+                ]
+              ]
+            ],
+            "score": 0.9695591926574707,
+            "source": "PP-OCRv5/original-frame",
+            "frame": 4200
+          }
+        }
+      ],
+      "note": ""
+    },
+    "F00004350": {
+      "scene_id": "S01",
+      "reference_id": "F00004200",
+      "status": "todo",
+      "quality": "clear",
+      "ocr_decision": "uncertain",
+      "events": [],
+      "reviewed": false,
+      "occluders": [],
+      "observations": [],
+      "note": ""
+    },
+    "F00004500": {
+      "scene_id": "S01",
+      "reference_id": "F00004350",
+      "status": "todo",
+      "quality": "clear",
+      "ocr_decision": "uncertain",
+      "events": [],
+      "reviewed": false,
+      "occluders": [],
+      "observations": [],
+      "note": ""
+    },
+    "F00004650": {
+      "scene_id": "S01",
+      "reference_id": "F00004500",
+      "status": "todo",
+      "quality": "clear",
+      "ocr_decision": "uncertain",
+      "events": [],
+      "reviewed": false,
+      "occluders": [],
+      "observations": [],
+      "note": ""
+    },
+    "F00004800": {
+      "scene_id": "S01",
+      "reference_id": "F00004650",
+      "status": "todo",
+      "quality": "clear",
+      "ocr_decision": "uncertain",
+      "events": [],
+      "reviewed": false,
+      "occluders": [],
+      "observations": [],
+      "note": ""
+    },
+    "F00004950": {
+      "scene_id": "S01",
+      "reference_id": "F00004800",
+      "status": "todo",
+      "quality": "clear",
+      "ocr_decision": "uncertain",
+      "events": [],
+      "reviewed": false,
+      "occluders": [],
+      "observations": [],
+      "note": ""
+    }
+  },
+  "saved_at": "2026-11-09T07:21:56.500359+00:00"
+}
