@@ -91,3 +91,6 @@ skills-lock.json
 #
 *.pptx
 
+
+# Web 产品任务数据
+data/jobs/

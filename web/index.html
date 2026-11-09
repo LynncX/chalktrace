@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>板书拾记</title><link rel="stylesheet" href="/css/app.css"><script defer src="/js/app.js"></script></head>
+<body><div class="app">
+<header><div class="brand"><h1>板书拾记</h1><span>课堂板书数字化</span></div><button id="home" class="nav">课程</button><span class="spacer"></span><button id="new" class="primary">＋ 新建任务</button></header>
+<div id="notice" role="status"></div>
+<section id="setup" class="setup">
+<div class="intro"><span class="eyebrow">从课堂视频到板书笔记</span><h2>留住每一段板书</h2><p>上传视频，选定白板区域，生成带原始证据的识别笔记。</p></div>
+<form id="upload-form"><label class="file-label">选择视频<input id="file" type="file" accept="video/*" required></label><p id="file-info" class="muted">支持 MP4、MOV、MKV、AVI、WebM，最大 2 GiB；浏览器建议使用 MP4。</p>
+<div id="preview-wrap" hidden><div class="preview"><video id="preview" preload="metadata" muted></video><canvas id="roi-canvas" aria-label="拖动框选白板区域"></canvas></div><label class="preview-seek">预览时间 <input id="preview-seek" type="range" min="0" max="0" step="0.1" value="0"><span id="preview-time">00:00</span></label><p class="muted">拖动时间滑块选择参考帧，在画面上拖动框选白板。<button id="clear-roi" type="button">清除选区</button></p><p id="roi-info">未框选：使用整幅画面</p></div>
+<div class="fields"><label>起点（秒）<input id="start" type="number" min="0" step="0.1" value="0" required></label><label>终点（秒，可留空）<input id="end" type="number" min="0" step="0.1"></label><label>采样间隔（秒）<input id="interval" type="number" min="0.1" step="0.1" value="5" required></label><label>最多候选帧<input id="frames" type="number" min="1" max="300" value="3" required></label><label>处理方式<select id="gate"><option value="fixed">固定采样</option><option value="occlusion_change">遮挡与变化门控</option><option value="change">仅变化门控</option></select></label></div>
+<p class="muted">默认仅处理 3 个候选帧，适合首次试跑。识别原文可能有错字，请结合证据核验。</p><button id="submit" class="primary" type="submit">开始生成笔记</button><progress id="upload-progress" max="100" value="0" hidden></progress></form>
+<div class="history"><h3>最近任务</h3><div id="jobs">正在加载…</div></div></section>
+<section id="result" hidden><div class="result-head"><h2 id="title"></h2><span id="status" class="badge"></span><span class="spacer"></span><a id="download-md" class="button" hidden>下载 Markdown</a><a id="download-txt" class="button primary" hidden>下载 TXT</a></div><div id="progress" class="progress"></div><p id="job-error" role="alert"></p>
+<div class="main"><aside class="side"><h3>板书目录</h3><div id="items"></div></aside><section class="stage"><video id="player" controls preload="metadata"></video><div class="evidence"><h3>板书证据 <small id="evidence-time"></small></h3><div class="evidence-grid"><figure><img id="crop" alt="板书裁剪"><figcaption>识别区域</figcaption></figure><figure><a id="source-link" target="_blank" rel="noopener"><img id="source" alt="原帧标框"></a><figcaption>原帧标框 · 点击放大</figcaption></figure></div></div></section><aside class="notes"><h3 class="sec-bar">识别笔记</h3><p class="muted">保留 OCR 原文；观察时间不等于书写时间。</p><pre id="note">请选择条目</pre><p id="observation" class="muted"></p></aside></div><details class="warnings"><summary>处理说明与告警</summary><ul id="warnings"></ul></details></section>
+</div></body></html>
